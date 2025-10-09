@@ -1,2 +1,2 @@
-# PI_FMABC_4-_Semestre
+# PI_FMABC_4_Semestre
 Atlas Digital Interativo de Histologia
