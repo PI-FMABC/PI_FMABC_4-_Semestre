@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Navegar para a home do professor
+              // Navega para a home do professor MUDAR DEPOIS !
               Navigator.pushReplacementNamed(context, '/prof');
             },
             child: const Text(

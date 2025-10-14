@@ -12,7 +12,6 @@ class HomeProfScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Voltar para a home normal
               Navigator.pushReplacementNamed(context, '/');
             },
             child: const Text(
@@ -34,9 +33,6 @@ class HomeProfScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            
-            
-            const SizedBox(height: 20),
             const Text("Pastas Mais Usadas",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
             const SizedBox(height: 10),
@@ -52,7 +48,7 @@ class HomeProfScreen extends StatelessWidget {
                   return Card(
                     elevation: 3,
                     child: InkWell(
-                      onTap: () => Navigator.pushNamed(context, '/folders'),
+                      onTap: () => Navigator.pushNamed(context, '/folders_prof'),
                       child: const Center(
                         child: Text("Pasta com IMG\nTítulo"),
                       ),
@@ -68,9 +64,9 @@ class HomeProfScreen extends StatelessWidget {
         currentIndex: 0,
         onTap: (i) {
           if (i == 0) Navigator.pushReplacementNamed(context, '/prof');
-          if (i == 1) Navigator.pushNamed(context, '/folders_prof');
-          if (i == 2) Navigator.pushNamed(context, '/index_prof');
-          if (i == 3) Navigator.pushNamed(context, '/gallery_prof');
+          if (i == 1) Navigator.pushReplacementNamed(context, '/folders_prof');
+          if (i == 2) Navigator.pushReplacementNamed(context, '/index_prof');
+          if (i == 3) Navigator.pushReplacementNamed(context, '/gallery_prof');
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
