@@ -122,7 +122,6 @@ class FoldersProfScreen extends StatelessWidget {
         ),
       ),
 
-      /// Menu inferior
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         onTap: (i) {
