@@ -12,7 +12,7 @@ class FoldersProfScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Voltar para a home normal
+              // volta para a home normal MUDAR
               Navigator.pushReplacementNamed(context, '/');
             },
             child: const Text(
@@ -22,6 +22,8 @@ class FoldersProfScreen extends StatelessWidget {
           ),
         ],
       ),
+
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -29,32 +31,67 @@ class FoldersProfScreen extends StatelessWidget {
           children: [
 
 
-            const Text(
-              "Células e Tecidos",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Células e Tecidos",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Os tecidos são classificados em quatro tipos básicos: "
+                  "epitelial, tecido conjuntivo (inclui cartilagem, osso e sangue), "
+                  "muscular e tecido nervoso.",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/add_folder_prof');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF003b64),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 46),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20), // Bordas arredondadas
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "Os tecidos são classificados em quatro tipos básicos: "
-              "epitelial, tecido conjuntivo (inclui cartilagem, osso e sangue), "
-              "muscular e tecido nervoso.",
-              style: TextStyle(fontSize: 16),
+            child: const Text(
+              "ADICIONAR\nPASTA",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 20),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
 
             /// Grid de pastas
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // quantidade de colunas
+                  crossAxisCount: 3, 
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.2,
                 ),
-                itemCount: 6, // número de pastas
+                itemCount: 6, 
                 itemBuilder: (context, index) {
                   return Card(
                     elevation: 3,
