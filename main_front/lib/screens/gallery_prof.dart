@@ -34,18 +34,35 @@ class GalleryProfScreen extends StatelessWidget {
           ),
         ],
       ),
+      
 
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Galeria Geral de Imagens",
-              style: TextStyle(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+              const Text(
+                "Galeria Geral de Imagens",
+                style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
+                ),
               ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/add_gallery');
+                },
+                icon: const Icon(Icons.add),
+                label: const Text("Adicionar à Galeria"),
+                style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF003b64),
+                foregroundColor: Colors.white,
+                ),
+              ),
+              ],
             ),
             const SizedBox(height: 16),
 

@@ -10,7 +10,7 @@ import 'screens/home_prof.dart';
 import 'screens/folders_prof.dart';
 import 'screens/index_prof.dart';
 import 'screens/gallery_prof.dart';
-import 'screens/add_folder_prof.dart';
+import 'screens/add_folder.dart';
 
 void main() {
   runApp(const AtlasApp());
