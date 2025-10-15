@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+    void _navigateToRoute(BuildContext context, String routeName) {
+    if (ModalRoute.of(context)?.settings.name != routeName) {
+      Navigator.pushNamed(context, routeName);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,17 +16,25 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF003b64),
         title: const Text("Atlas de Citologia"),
         actions: [
+
           TextButton(
-            onPressed: () {
-              // Navega para a home do professor MUDAR DEPOIS !
-              Navigator.pushReplacementNamed(context, '/prof');
-            },
-            child: const Text(
-              "Login Professor",
-              style: TextStyle(color: Colors.white),
-            ),
+            onPressed: () => _navigateToRoute(context, '/'),
+            child: const Text("HOME", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/folders'),
+            child: const Text("DIRETÓRIOS", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/gallery'),
+            child: const Text("GALERIA", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/prof'),
+            child: const Text("Login Professor", style: TextStyle(color: Colors.white)),
           ),
         ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
