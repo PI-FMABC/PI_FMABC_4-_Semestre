@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+    void _navigateToRoute(BuildContext context, String routeName) {
+    if (ModalRoute.of(context)?.settings.name != routeName) {
+      Navigator.pushNamed(context, routeName);
+    }
+  }
+
 class FoldersScreen extends StatelessWidget {
   const FoldersScreen({super.key});
 
@@ -11,13 +17,23 @@ class FoldersScreen extends StatelessWidget {
         title: const Text("Atlas de Citologia"),
         actions: [
           TextButton(
-            onPressed: () {},
-            child: const Text(
-              "Login Professor",
-              style: TextStyle(color: Colors.white),
-            ),
+            onPressed: () => _navigateToRoute(context, '/'),
+            child: const Text("HOME", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/folders'),
+            child: const Text("DIRETÓRIOS", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/gallery'),
+            child: const Text("GALERIA", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => _navigateToRoute(context, '/prof'),
+            child: const Text("Login Professor", style: TextStyle(color: Colors.white)),
           ),
         ],
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
