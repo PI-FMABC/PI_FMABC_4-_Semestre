@@ -49,6 +49,37 @@ class GalleryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+                        Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por imagens...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      // LÓGICA PARA BUSCA
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    // Implemente a ação de busca aqui
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF003b64),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Buscar'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             /// Grid de imagens
             Expanded(
               child: GridView.builder(
