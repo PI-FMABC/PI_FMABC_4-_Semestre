@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'screens/home.dart';
 import 'screens/folders.dart';
@@ -8,6 +10,7 @@ import 'screens/home_prof.dart';
 import 'screens/folders_prof.dart';
 import 'screens/index_prof.dart';
 import 'screens/gallery_prof.dart';
+import 'screens/add_folder_prof.dart';
 
 void main() {
   runApp(const AtlasApp());
@@ -36,6 +39,7 @@ class AtlasApp extends StatelessWidget {
         '/folders_prof': (context) => FoldersProfScreen(),
         '/index_prof': (context) => IndexProfScreen(),
         '/gallery_prof': (context) => const GalleryProfScreen(),
+        '/add_folder_prof': (context) => const AddFoldersScreen(),
         // '/image-viewer_prof': (context) => const ImageViewerProfScreen(),
       },
     );
