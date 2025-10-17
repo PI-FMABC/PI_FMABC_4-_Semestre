@@ -12,6 +12,7 @@ import 'screens/index_prof.dart';
 import 'screens/gallery_prof.dart';
 import 'screens/add_folder.dart';
 import 'screens/add_gallery.dart';
+import 'screens/login.dart';
 void main() {
   runApp(const AtlasApp());
 }
@@ -41,6 +42,7 @@ class AtlasApp extends StatelessWidget {
         '/gallery_prof': (context) => const GalleryProfScreen(),
         '/add_folder_prof': (context) => const AddFoldersScreen(),
         '/add_gallery': (context) => const AddGallery(),
+        '/login': (context) => const LoginTela(),
         // '/image-viewer_prof': (context) => const ImageViewerProfScreen(),
       },
     );

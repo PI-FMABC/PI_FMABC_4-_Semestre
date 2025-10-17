@@ -30,8 +30,8 @@ class HomeScreen extends StatelessWidget {
             child: const Text("GALERIA", style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () => _navigateToRoute(context, '/prof'),
-            child: const Text("Login Professor", style: TextStyle(color: Colors.white)),
+            onPressed: () => _navigateToRoute(context, '/login'),
+            child: const Text("Login", style: TextStyle(color: Colors.white)),
           ),
         ],
 
