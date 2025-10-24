@@ -1,130 +1,235 @@
 import 'package:flutter/material.dart';
 
-    void _navigateToRoute(BuildContext context, String routeName) {
-    if (ModalRoute.of(context)?.settings.name != routeName) {
-      Navigator.pushNamed(context, routeName);
-    }
-  }
-
 class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF003b64),
-        title: const Text("Atlas de Citologia"),
-        actions: [
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/'),
-            child: const Text("HOME", style: TextStyle(color: Colors.white)),
+      backgroundColor: Colors.white,
+
+      /// ===========================
+      /// NAVBAR SUPERIOR
+      /// ===========================
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          color: const Color(0xFF003b64),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // LOGO + TÍTULO
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/logo.png',
+                      height: 55,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Atlas de Citologia",
+                      style: TextStyle(
+                        color: Color(0xFF009245),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // BOTÃO LOGIN
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF003b64),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.person),
+                  label: const Text("Login"),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/folders'),
-            child: const Text("DIRETÓRIOS", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/gallery'),
-            child: const Text("GALERIA", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/prof'),
-            child: const Text("Login Professor", style: TextStyle(color: Colors.white)),
-          ),
-        ],
+        ),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Galeria Geral de Imagens",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
+      /// ===========================
+      /// CONTEÚDO PRINCIPAL
+      /// ===========================
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// ===== MENU SUPERIOR =====
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => Navigator.pushNamed(context, '/')),
+                      _buildMenuButton(context, "Tópicos",
+                          onTap: () => Navigator.pushNamed(context, '/folders')),
+                      _buildMenuButton(context, "Galeria", isActive: true),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
 
-                        Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Buscar por imagens...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
+              const SizedBox(height: 28),
+
+              /// ===== TÍTULO =====
+              const Text(
+                "Galeria Geral de Imagens",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Color(0xFF003b64),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              /// ===== CAMPO DE BUSCA =====
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Buscar por imagens...',
+                        prefixIcon: const Icon(Icons.search),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Color(0xFF003b64)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF009245),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        // lógica de busca
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // ação de busca
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF003b64),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 14),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onChanged: (value) {
-                      // LÓGICA PARA BUSCA
-                    },
+                    icon: const Icon(Icons.search),
+                    label: const Text("Buscar"),
                   ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    // Implemente a ação de busca aqui
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF003b64),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Buscar'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                ],
+              ),
 
-            /// Grid de imagens
-            Expanded(
-              child: GridView.builder(
+              const SizedBox(height: 28),
+
+              /// ===== GRID DE IMAGENS =====
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 20,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5, // quantidade de colunas
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  crossAxisCount: 5,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1,
                 ),
-                itemCount: 20, // número de imagens
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/image-viewer'),
-                    child: Card(
-                      elevation: 2,
-                      child: const Center(
-                        child: Icon(
-                          Icons.image,
-                          size: 40,
-                          color: Colors.grey,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: const Color(0xFF003b64)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/folder_image.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.image_outlined,
+                            size: 50,
+                            color: Color(0xFF003b64),
+                          ),
                         ),
                       ),
                     ),
                   );
                 },
               ),
-            ),
-          ],
+
+              const SizedBox(height: 36),
+
+              /// ===== RODAPÉ =====
+              Center(
+                child: Text(
+                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
 
-      /// Menu inferior
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 3,
-        onTap: (i) {
-          if (i == 0) Navigator.pushNamed(context, '/');
-          if (i == 1) Navigator.pushNamed(context, '/folders');
-          if (i == 2) Navigator.pushNamed(context, '/index');
-          if (i == 3) Navigator.pushNamed(context, '/gallery');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Pastas"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
+  /// ===== BOTÃO DE MENU =====
+  Widget _buildMenuButton(BuildContext context, String label,
+      {bool isActive = false, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF003b64) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,120 +1,242 @@
 import 'package:flutter/material.dart';
 
-    void _navigateToRoute(BuildContext context, String routeName) {
-    if (ModalRoute.of(context)?.settings.name != routeName) {
-      Navigator.pushNamed(context, routeName);
-    }
-  }
-
 class IndexScreen extends StatelessWidget {
   const IndexScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF003b64),
-        title: const Text("Atlas de Citologia"),
-        actions: [
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/'),
-            child: const Text("HOME", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/folders'),
-            child: const Text("DIRETÓRIOS", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/gallery'),
-            child: const Text("GALERIA", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () => _navigateToRoute(context, '/prof'),
-            child: const Text("Login Professor", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-      
-      body: Row(
-        children: [
-          /// Barra lateral (categorias)
-          Container(
-            width: 180,
-            color: Colors.grey[200],
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
-                const Text(
-                  "Índice de Imagens",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const Divider(),
-                ListTile(
-                  title: const Text("#AA"),
-                  onTap: () {},
-                ),
-                ListTile(
-                  title: const Text("#BB"),
-                  onTap: () {},
-                ),
-                ListTile(
-                  title: const Text("#CC"),
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
+      backgroundColor: Colors.white,
 
-          /// Área principal com grid de imagens
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // 4 colunas
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: 12, // número de imagens
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/image-viewer'),
-                    child: Card(
-                      elevation: 2,
-                      child: const Center(
-                        child: Icon(
-                          Icons.image,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
+      /// ===========================
+      /// NAVBAR SUPERIOR
+      /// ===========================
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          color: const Color(0xFF003b64),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // LOGO + TÍTULO
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/logo.png',
+                      height: 55,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Atlas de Citologia",
+                      style: TextStyle(
+                        color: Color(0xFF009245),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ),
+
+              // BOTÃO LOGIN
+             Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF003b64),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.person),
+                  label: const Text("Login"),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
 
-      /// Menu inferior
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        onTap: (i) {
-          if (i == 0) Navigator.pushNamed(context, '/');
-          if (i == 1) Navigator.pushNamed(context, '/folders');
-          if (i == 2) Navigator.pushNamed(context, '/index');
-          if (i == 3) Navigator.pushNamed(context, '/gallery');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Pastas"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
+      /// ===========================
+      /// CORPO PRINCIPAL
+      /// ===========================
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            children: [
+              /// ===== MENU SUPERIOR =====
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => Navigator.pushNamed(context, '/')),
+                      _buildMenuButton(context, "Tópicos",
+                          onTap: () => Navigator.pushNamed(context, '/folders')),
+                      _buildMenuButton(context, "Galeria",
+                          onTap: () => Navigator.pushNamed(context, '/gallery')),
+                      _buildMenuButton(context, "Índice", isActive: true),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              /// ===== ÁREA DE CONTEÚDO =====
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// ==== SIDEBAR ====
+                  Container(
+                    width: 200,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Índice de Imagens",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF003b64),
+                          ),
+                        ),
+                        const Divider(thickness: 1),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("#AA"),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("#BB"),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("#CC"),
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  /// ==== GRID DE IMAGENS ====
+                  Expanded(
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1,
+                      ),
+                      itemCount: 12,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/image-viewer'),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border:
+                                  Border.all(color: const Color(0xFF003b64)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Image.asset(
+                                      'assets/folder_image.png',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.image_outlined,
+                                        color: Color(0xFF003b64),
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Imagem ${index + 1}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 36),
+
+              /// ===== RODAPÉ =====
+              Center(
+                child: Text(
+                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ===== BOTÃO DE MENU =====
+  Widget _buildMenuButton(BuildContext context, String label,
+      {bool isActive = false, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF003b64) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

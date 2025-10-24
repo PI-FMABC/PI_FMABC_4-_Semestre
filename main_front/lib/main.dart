@@ -42,7 +42,7 @@ class AtlasApp extends StatelessWidget {
         '/gallery_prof': (context) => const GalleryProfScreen(),
         '/add_folder_prof': (context) => const AddFoldersScreen(),
         '/add_gallery': (context) => const AddGallery(),
-        '/login': (context) => const LoginTela(),
+        '/login': (context) => const LoginScreen(),
         // '/image-viewer_prof': (context) => const ImageViewerProfScreen(),
       },
     );

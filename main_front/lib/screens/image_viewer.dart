@@ -6,131 +6,272 @@ class ImageViewerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF003b64),
-        title: const Text("Atlas de Citologia"),
-        actions: [
-          TextButton(
-            onPressed: () {},
-            child: const Text(
-              "Login Professor",
-              style: TextStyle(color: Colors.white),
-            ),
+      backgroundColor: Colors.white,
+
+      /// ===========================
+      /// NAVBAR SUPERIOR
+      /// ===========================
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          color: const Color(0xFF003b64),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // LOGO + TÍTULO
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/logo.png',
+                      height: 55,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Atlas de Citologia",
+                      style: TextStyle(
+                        color: Color(0xFF009245),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // BOTÃO LOGIN
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF003b64),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.person),
+                  label: const Text("Login"),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
 
-      body: Row(
-        children: [
-          /// Área principal da imagem
-          Expanded(
-            flex: 3,
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
+      /// ===========================
+      /// CONTEÚDO PRINCIPAL
+      /// ===========================
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            children: [
+              /// ===== MENU SUPERIOR =====
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => Navigator.pushNamed(context, '/')),
+                      _buildMenuButton(context, "Tópicos",
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/folders')),
+                      _buildMenuButton(context, "Galeria",
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/gallery')),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(
-                        Icons.image,
-                        size: 100,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
 
-          /// Painel lateral (anotações e pins)
-          Container(
-            width: 250,
-            color: Colors.grey[100],
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+              const SizedBox(height: 28),
+
+              /// ===== ÁREA DE CONTEÚDO =====
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Anotações:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  /// Lista de anotações (mock por enquanto)
+                  /// ===== ÁREA PRINCIPAL DA IMAGEM =====
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 3,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          child: ListTile(
-                            leading: const Icon(Icons.push_pin,
-                                color: Colors.blue),
-                            title: Text("Anotação ${index + 1}"),
-                            subtitle: const Text("Descrição curta"),
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Color(0xFF003b64)),
+                          label: const Text(
+                            "Voltar",
+                            style: TextStyle(
+                              color: Color(0xFF003b64),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                        Container(
+                          height: 500,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: const Color(0xFF003b64), width: 1.2),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              'assets/folder_image.png',
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Center(
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  size: 100,
+                                  color: Color(0xFF003b64),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Adicionar Pin:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(width: 24),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.push_pin),
-                        label: const Text("Pin"),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.edit),
-                        label: const Text("Nota"),
-                      ),
-                    ],
+                  /// ===== PAINEL LATERAL =====
+                  Container(
+                    width: 280,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Anotações",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xFF003b64),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        /// LISTA DE ANOTAÇÕES
+                        ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: 3,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              elevation: 1,
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              child: ListTile(
+                                leading: const Icon(Icons.push_pin,
+                                    color: Color(0xFF003b64)),
+                                title: Text("Anotação ${index + 1}"),
+                                subtitle: const Text("Descrição breve..."),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const Divider(thickness: 1.2),
+                        const SizedBox(height: 10),
+
+                        const Text(
+                          "Adicionar Pin:",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF003b64),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.push_pin),
+                                label: const Text("Pin"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF003b64),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.edit),
+                                label: const Text("Nota"),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF003b64),
+                                  side: const BorderSide(
+                                      color: Color(0xFF003b64), width: 1.2),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
+
+              const SizedBox(height: 36),
+
+              /// ===== RODAPÉ =====
+              Center(
+                child: Text(
+                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ===== BOTÃO DE MENU =====
+  Widget _buildMenuButton(BuildContext context, String label,
+      {bool isActive = false, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF003b64) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
-      ),
-
-      /// Menu inferior
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: -1, // Nenhum marcado porque é tela secundária
-        onTap: (i) {
-          if (i == 0) Navigator.pushNamed(context, '/');
-          if (i == 1) Navigator.pushNamed(context, '/folders');
-          if (i == 2) Navigator.pushNamed(context, '/index');
-          if (i == 3) Navigator.pushNamed(context, '/gallery');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Pastas"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
+        ),
       ),
     );
   }

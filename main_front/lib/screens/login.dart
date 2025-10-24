@@ -1,122 +1,151 @@
 import 'package:flutter/material.dart';
 
-class LoginTela extends StatelessWidget {
-  const LoginTela({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
-  // TEMPORARIO P/ ENTRAR NA TELA DE PROFESSOR
-  void _fazerLogin(BuildContext context, String email, String senha) {
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Função aproveitada do código antigo + popup verde
+  void _fazerLogin(BuildContext context) {
+    final email = _emailController.text.trim();
+    final senha = _passwordController.text.trim();
+
     if (email == 'prof@gmail.com' && senha == 'prof123') {
-      Navigator.pushReplacementNamed(context, '/prof');
-    } 
+      // Mostra popup verde de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green[600],
+          content: const Text(
+            'Login bem-sucedido!',
+            style: TextStyle(fontSize: 16),
+          ),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Redireciona após 1 segundo
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacementNamed(context, '/prof');
+      });
+    } else {
+      // Falha de login
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Email ou senha incorretos.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final senhaController = TextEditingController();
-
     return Scaffold(
+      backgroundColor: const Color(0xFF003b64),
+
+      /// ===== APPBAR COM SETA DE VOLTAR =====
       appBar: AppBar(
-        title: const Text('Login Professor'),
-        backgroundColor: const Color(0xFF003b64),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF003b64)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Image.asset(
+          'assets/logo.png',
+          height: 50,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
       ),
-      body: Container(
-        color: Colors.grey[100],
-        child: Center(
+
+      /// ===== CORPO PRINCIPAL =====
+      body: Center(
+        child: SingleChildScrollView(
           child: Container(
             width: 350,
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF003b64),
-              borderRadius: BorderRadius.circular(16.0),
+              color: const Color(0xFFEFEFEF),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(2, 4),
                 ),
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                const Center(
+                  child: Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                
-                // email
+                const SizedBox(height: 20),
+
+                /// Campo de Email
+                const Text("Email:"),
+                const SizedBox(height: 5),
                 TextField(
-                  controller: emailController,
-                  style: const TextStyle(color: Colors.white),
+                  controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: 'E-mail',
-                    labelStyle: const TextStyle(color: Colors.white70),
+                    hintText: 'Email',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
-                    ),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
-                
-                // senha
+                const SizedBox(height: 15),
+
+                /// Campo de Senha
+                const Text("Senha:"),
+                const SizedBox(height: 5),
                 TextField(
-                  controller: senhaController,
+                  controller: _passwordController,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Senha',
-                    labelStyle: const TextStyle(color: Colors.white70),
+                    hintText: 'Senha',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(color: Colors.white),
-                    ),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 24),
-                
-                // entrar
+                const SizedBox(height: 20),
+
+                /// Botão Fazer Login
                 ElevatedButton(
-                  onPressed: () {
-                    _fazerLogin(
-                      context,
-                      emailController.text.trim(),
-                      senhaController.text.trim(),
-                    );
-                  },
+                  onPressed: () => _fazerLogin(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF003b64),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    backgroundColor: const Color(0xFF009245),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
                   child: const Text(
-                    'Entrar',
+                    "Fazer Login",
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),

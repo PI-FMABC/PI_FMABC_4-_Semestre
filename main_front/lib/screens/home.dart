@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF003b64),
@@ -82,9 +82,11 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       _buildMenuButton(context, "Home", isActive: true),
                       _buildMenuButton(context, "Tópicos",
-                          onTap: () => Navigator.pushNamed(context, '/folders')),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/folders')),
                       _buildMenuButton(context, "Galeria",
-                          onTap: () => Navigator.pushNamed(context, '/gallery')),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/gallery')),
                     ],
                   ),
                 ),
@@ -232,7 +234,6 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          
                           Image.asset(
                             'assets/logo.png',
                             height: 60,
@@ -247,8 +248,7 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 10),
                           Text(
                             "Pasta ${index + 1}",
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           const Text("XX imagens"),
