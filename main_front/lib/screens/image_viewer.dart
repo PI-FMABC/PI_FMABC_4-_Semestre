@@ -24,13 +24,13 @@ class ImageViewerScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Image.asset(
-                      'assets/logo.png',
+                      'lib/assets/logo.png',
                       height: 55,
                       errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      "Atlas de Citologia",
+                      "Atlas de Histologia",
                       style: TextStyle(
                         color: Color(0xFF009245),
                         fontSize: 22,

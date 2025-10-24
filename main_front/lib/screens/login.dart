@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Image.asset(
-          'assets/logo.png',
+          'lib/assets/logo.png',
           height: 50,
           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
         ),
