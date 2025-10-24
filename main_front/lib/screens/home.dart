@@ -104,7 +104,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Bem-vindo ao Atlas Digital de Citologia",
+                          "Bem-vindo ao Atlas Digital de Histologia",
                           style: TextStyle(
                             fontSize: 28,
                             color: Color(0xFF003b64),
@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         const Text(
-                          "Explore imagens citológicas em alta resolução, anote observações e consulte materiais organizados por tópicos.",
+                          "Explore imagens histológicas em alta resolução, anote observações e consulte materiais organizados por tópicos.",
                           style: TextStyle(fontSize: 16, height: 1.5),
                         ),
                         const SizedBox(height: 18),
