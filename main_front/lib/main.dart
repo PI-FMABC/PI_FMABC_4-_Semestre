@@ -10,6 +10,7 @@ import 'screens/home_prof.dart';
 import 'screens/folders_prof.dart';
 import 'screens/index_prof.dart';
 import 'screens/gallery_prof.dart';
+import 'screens/image_viewer_prof.dart';
 import 'screens/add_folder.dart';
 import 'screens/add_gallery.dart';
 import 'screens/login.dart';
@@ -40,10 +41,10 @@ class AtlasApp extends StatelessWidget {
         '/folders_prof': (context) => FoldersProfScreen(),
         '/index_prof': (context) => IndexProfScreen(),
         '/gallery_prof': (context) => const GalleryProfScreen(),
+        '/image-viewer-prof': (context) => const ImageViewerProfScreen(),
         '/add_folder_prof': (context) => const AddFoldersScreen(),
         '/add_gallery': (context) => const AddGallery(),
         '/login': (context) => const LoginScreen(),
-        // '/image-viewer_prof': (context) => const ImageViewerProfScreen(),
       },
     );
   }

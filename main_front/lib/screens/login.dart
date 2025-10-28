@@ -55,15 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF003b64)),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Image.asset(
           'lib/assets/logo.png',
           height: 50,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
         ),
+        centerTitle: false,
       ),
 
       /// ===== CORPO PRINCIPAL =====
@@ -136,8 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () => _fazerLogin(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF009245),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
