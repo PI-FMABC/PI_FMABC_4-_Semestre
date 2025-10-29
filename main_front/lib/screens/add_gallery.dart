@@ -1,95 +1,197 @@
 import 'package:flutter/material.dart';
 
-class AddGallery extends StatelessWidget {
-  const AddGallery({super.key});
+class AddGalleryScreen extends StatelessWidget {
+  const AddGalleryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
+
+      /// ---------------------- APPBAR ----------------------
       appBar: AppBar(
         backgroundColor: const Color(0xFF003b64),
-        title: const Text("Atlas de Citologia"),
-        actions: [],
+        title: const Text(
+          "Atlas de Citologia - Modo Professor",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextButton.icon(
+              onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+              icon: const Icon(Icons.logout, color: Color(0xFF003b64)),
+              label: const Text(
+                "Sair",
+                style: TextStyle(
+                  color: Color(0xFF003b64),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
 
+      /// ---------------------- BODY ----------------------
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// Título
             const Text(
-              'Adicionar nova imagem a galeria',
+              'Adicionar nova imagem à galeria',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: Color(0xFF003b64),
               ),
             ),
             const SizedBox(height: 24),
+
+            /// Formulário principal
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-
+                  /// Coluna esquerda: título + descrição
                   Expanded(
+                    flex: 1,
                     child: Column(
                       children: [
                         TextField(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Inserir título',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Inserir descrição',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-
-
-                  Expanded(
-                    child: Column(
-                      children: [
-                        TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Selecionar diretório',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // LÓGICA IMPORTAR IMAGEM
-                            },
-                            icon: const Icon(Icons.image),
-                            label: const Text('Importar Imagem'),
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                              backgroundColor: Colors.white
+                            hintText: 'Título da imagem...',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF003b64),
+                                width: 2,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
+                        TextField(
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            labelText: 'Inserir descrição',
+                            hintText: 'Descrição detalhada da imagem...',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF003b64),
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 32),
+
+                  /// Coluna direita: diretório + botões
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Selecionar diretório',
+                            hintText: 'Digite o nome do diretório...',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF003b64)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF003b64),
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        /// Botão importar imagem
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              // LÓGICA SALVAR IMAGEM
+                              // Lógica futura: importar imagem
+                            },
+                            icon: const Icon(Icons.image),
+                            label: const Text('Importar Imagem'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF003b64),
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(0, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        /// Botão salvar imagem
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Lógica futura: salvar imagem
                             },
                             icon: const Icon(Icons.save),
-                            label: const Text('Salvar imagem'),
+                            label: const Text('Salvar Imagem'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              minimumSize: const Size(0, 48),
+                              foregroundColor: const Color(0xFF003b64),
+                              side: const BorderSide(color: Color(0xFF003b64)),
+                              minimumSize: const Size(0, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
@@ -102,13 +204,17 @@ class AddGallery extends StatelessWidget {
           ],
         ),
       ),
+
+      /// ---------------------- MENU INFERIOR ----------------------
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
+        currentIndex: 3,
+        selectedItemColor: const Color(0xFF003b64),
+        unselectedItemColor: Colors.grey[600],
         onTap: (i) {
-          if (i == 0) Navigator.pushNamed(context, '/');
-          if (i == 1) Navigator.pushNamed(context, '/folders');
-          if (i == 2) Navigator.pushNamed(context, '/index');
-          if (i == 3) Navigator.pushNamed(context, '/gallery');
+          if (i == 0) Navigator.pushReplacementNamed(context, '/prof');
+          if (i == 1) Navigator.pushReplacementNamed(context, '/folders_prof');
+          if (i == 2) Navigator.pushNamed(context, '/index_prof');
+          if (i == 3) Navigator.pushNamed(context, '/gallery_prof');
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
