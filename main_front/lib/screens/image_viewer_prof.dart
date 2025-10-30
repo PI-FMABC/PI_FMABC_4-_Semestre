@@ -177,16 +177,16 @@ class ImageViewerProfScreen extends StatelessWidget {
                           ),
 
                           // barra inferior com zoom (visual apenas)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Icon(Icons.location_on_outlined,
+                                Icon(Icons.location_on_outlined,
                                     color: Color(0xFF003b64)),
                                 Row(
-                                  children: const [
+                                  children: [
                                     Text("100%"),
                                     SizedBox(width: 8),
                                     Icon(Icons.remove, color: Color(0xFF003b64)),
@@ -363,11 +363,11 @@ class ImageViewerProfScreen extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                child: const Text("Excluir"),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red,
                                   side: const BorderSide(color: Colors.red),
                                 ),
+                                child: const Text("Excluir"),
                               ),
                             ),
                           ],
