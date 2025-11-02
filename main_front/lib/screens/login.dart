@@ -34,6 +34,25 @@ class _LoginScreenState extends State<LoginScreen> {
       Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushReplacementNamed(context, '/prof');
       });
+    }     // Verifica se é administrador
+    else if (email == 'adm' && senha == '123') {
+      // Mostra popup verde de sucesso para admin
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green[600],
+          content: const Text(
+            'Login de administrador bem-sucedido!',
+            style: TextStyle(fontSize: 16),
+          ),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Redireciona para tela do admin após 1 segundo
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacementNamed(context, '/adm');
+      });
     } else {
       // Falha de login
       ScaffoldMessenger.of(context).showSnackBar(

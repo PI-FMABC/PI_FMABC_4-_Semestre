@@ -14,6 +14,7 @@ import 'screens/image_viewer_prof.dart';
 import 'screens/add_folder.dart';
 import 'screens/add_gallery.dart';
 import 'screens/login.dart';
+import 'screens/adm.dart';
 
 void main() {
   runApp(const AtlasApp());
@@ -46,6 +47,7 @@ class AtlasApp extends StatelessWidget {
         '/add_folder_prof': (context) => const AddFolderScreen(),
         '/add_gallery': (context) => const AddGalleryScreen(),
         '/login': (context) => const LoginScreen(),
+        '/adm': (context) => const AdmScreen(),
       },
     );
   }
