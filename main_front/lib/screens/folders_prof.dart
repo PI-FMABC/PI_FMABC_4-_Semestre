@@ -249,28 +249,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Células e Tecidos",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Color(0xFF003b64),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "Os tecidos são classificados em quatro tipos básicos: "
-                        "epitelial, conjuntivo (inclui cartilagem, osso e sangue), "
-                        "muscular e nervoso.",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
+                Expanded(child: Container()), // mantém o layout sem o texto
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: _showAddTopicDialog,
