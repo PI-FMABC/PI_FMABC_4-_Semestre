@@ -91,3 +91,29 @@ app.delete("/diretorio/:id", async (req, res) => {
     res.status(500).json({ erro: erro.message });
   }
 });
+
+// Atualizar item pelo ID
+app.put("/diretorio/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedItem = await Diretorio.findByIdAndUpdate(
+      id,
+      {
+        titulo: req.body.titulo,
+        descricao: req.body.descricao,
+        listIMG: req.body.listIMG,
+      },
+      { new: true } // retorna o item atualizado
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ erro: "Item não encontrado para edição" });
+    }
+
+    console.log("Item atualizado com sucesso:", updatedItem._id);
+    res.status(200).json(updatedItem);
+  } catch (erro) {
+    console.log("Erro ao editar item:", erro.message);
+    res.status(500).json({ erro: erro.message });
+  }
+});

@@ -89,12 +89,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          final index = folders.indexWhere((folder) => folder['_id'] == id);
-          if (index != -1) {
-            folders[index] = json.decode(response.body);
-          }
-        });
+        // Atualiza manualmente no front
+        final index = folders.indexWhere((folder) => folder['_id'] == id);
+        if (index != -1) {
+          setState(() {
+            folders[index]['titulo'] = titulo;
+            folders[index]['descricao'] = descricao;
+            folders[index]['listIMG'] = [img];
+          });
+        }
       } else {
         debugPrint('Erro ao editar tópico: ${response.statusCode}');
       }
