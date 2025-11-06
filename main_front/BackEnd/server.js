@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+//rotas:
 const Diretorio = require("./diretorioSchema");
+const InfoImagem = require("./infoImagemSchema");
 
 const app = express();
 app.use(express.json());
@@ -11,16 +13,24 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// Inicializa servidor
-app.listen(PORT, () =>
-  console.log(` Servidor rodando em http://localhost:${PORT}`)
-);
+// Conexão com o MongoDB e inicializa servidor somente após conectar
+async function start() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(" Conectado ao MongoDB");
 
-// Conexão com o MongoDB
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log(" Conectado ao MongoDB"))
-  .catch((err) => console.error(" MongoDB erro de conexão:", err));
+    app.listen(PORT, () =>
+      console.log(` Servidor rodando em http://localhost:${PORT}`)
+    );
+  } catch (err) {
+    console.error(" MongoDB erro de conexão:", err);
+    process.exit(1); // encerra para evitar comportamento inconsistente
+  }
+}
+start();
 
 // Teste de status da API
 app.get("/test", async (req, res) => {
@@ -35,6 +45,7 @@ app.get("/test", async (req, res) => {
   }
 });
 
+// Parte de Diretorio:
 // Criar novo item
 app.post("/diretorio", async (req, res) => {
   try {
@@ -103,7 +114,7 @@ app.put("/diretorio/:id", async (req, res) => {
         descricao: req.body.descricao,
         listIMG: req.body.listIMG,
       },
-      { new: true } // retorna o item atualizado
+      { new: true, runValidators: true } // retorna o item atualizado e executa validações
     );
 
     if (!updatedItem) {
@@ -116,4 +127,12 @@ app.put("/diretorio/:id", async (req, res) => {
     console.log("Erro ao editar item:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
+});
+
+// Imagens
+
+// middleware de erro genérico
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({ erro: err.message || "Erro interno" });
 });
