@@ -129,7 +129,7 @@ app.put("/diretorio/:id", async (req, res) => {
   }
 });
 
-// Imagens
+//Parte das Imagens
 
 // middleware de erro genérico
 app.use((err, req, res, next) => {
