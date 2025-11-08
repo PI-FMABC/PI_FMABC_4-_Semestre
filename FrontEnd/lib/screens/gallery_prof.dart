@@ -1,20 +1,137 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-void _navigateToRoute(BuildContext context, String routeName) {
-  if (ModalRoute.of(context)?.settings.name != routeName) {
-    Navigator.pushNamed(context, routeName);
-  }
+class GalleryProfScreen extends StatefulWidget {
+  const GalleryProfScreen({super.key});
+
+  @override
+  State<GalleryProfScreen> createState() => _GalleryProfScreenState();
 }
 
-class GalleryProfScreen extends StatelessWidget {
-  const GalleryProfScreen({super.key});
+class _GalleryProfScreenState extends State<GalleryProfScreen> {
+  List<dynamic> imagens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchImagens();
+  }
+
+  Future<void> fetchImagens() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/infoimagem'));
+      if (response.statusCode == 200) {
+        setState(() {
+          imagens = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar imagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar imagens: $e');
+    }
+  }
+
+  Future<void> deleteImagem(String id) async {
+    try {
+      final response =
+          await http.delete(Uri.parse('http://localhost:3000/infoimagem/$id'));
+      if (response.statusCode == 200) {
+        setState(() {
+          imagens.removeWhere((img) => img['_id'] == id);
+        });
+      } else {
+        debugPrint('Erro ao excluir imagem: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao excluir imagem: $e');
+    }
+  }
+
+  Future<void> _addImagemToDB(
+      String nomeNaPasta, String nomeImagem, String descricao) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/infoimagem'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'nomeNaPasta': nomeNaPasta,
+          'nomeImagem': nomeImagem,
+          'descricao': descricao,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          imagens.add(json.decode(response.body));
+        });
+      } else {
+        debugPrint('Erro ao adicionar imagem: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao adicionar imagem: $e');
+    }
+  }
+
+  void _showAddImagemDialog() {
+    final _nomeNaPastaController = TextEditingController();
+    final _nomeImagemController = TextEditingController();
+    final _descricaoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Adicionar Imagem"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nomeNaPastaController,
+                decoration: const InputDecoration(labelText: "Nome da pasta"),
+              ),
+              TextField(
+                controller: _nomeImagemController,
+                decoration: const InputDecoration(labelText: "Nome da imagem"),
+              ),
+              TextField(
+                controller: _descricaoController,
+                decoration: const InputDecoration(labelText: "Descrição"),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final nomeNaPasta = _nomeNaPastaController.text.trim();
+              final nomeImagem = _nomeImagemController.text.trim();
+              final descricao = _descricaoController.text.trim();
+
+              if (nomeNaPasta.isEmpty ||
+                  nomeImagem.isEmpty ||
+                  descricao.isEmpty) return;
+
+              await _addImagemToDB(nomeNaPasta, nomeImagem, descricao);
+              Navigator.pop(context);
+            },
+            child: const Text("Adicionar"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-
-      /// ---------------------- APPBAR ----------------------
       appBar: AppBar(
         backgroundColor: const Color(0xFF003b64),
         title: const Text(
@@ -42,160 +159,125 @@ class GalleryProfScreen extends StatelessWidget {
           ),
         ],
       ),
-
-      /// ---------------------- BODY ----------------------
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Título + botão de adicionar
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text(
-                  "Galeria Geral de Imagens",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Color(0xFF003b64),
-                  ),
-                ),
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/add_gallery'),
+                  onPressed: _showAddImagemDialog,
                   icon: const Icon(Icons.add),
-                  label: const Text("Adicionar à Galeria"),
+                  label: const Text("Adicionar Imagem"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF003b64),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                        vertical: 14, horizontal: 24),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-
-            /// Campo de busca
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Buscar por imagens...',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFF003b64), width: 1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFF003b64), width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFF003b64), width: 2),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      // Lógica de busca futura
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    // Ação de busca
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF003b64),
-                    foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text('Buscar'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            /// Grid de imagens
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
-                ),
-                itemCount: 20,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/image_viewer_prof'),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              child: imagens.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF003b64),
                       ),
-                      child: Stack(
-                        children: [
-                          const Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
+                    )
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      itemCount: imagens.length,
+                      itemBuilder: (context, index) {
+                        final img = imagens[index];
+                        final titulo = img['nomeImagem'] ?? 'Sem título';
+                        final descricao = img['descricao'] ?? '';
+                        final id = img['_id'] ?? '';
+                        final previewPath = img['previewPath'] ?? '';
 
-                          /// Botões de ação para o professor
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Color(0xFF003b64)),
-                                  onPressed: () {
-                                    // Função futura: editar imagem
-                                  },
-                                ),
-                                IconButton(
+                        return Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: previewPath.isNotEmpty
+                                        ? Image.network(
+                                            'http://localhost:3000/tiles/${previewPath.replaceAll("\\", "/")}',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) =>
+                                                const Icon(
+                                              Icons.broken_image,
+                                              size: 50,
+                                              color: Colors.grey,
+                                            ),
+                                          )
+                                        : const Center(
+                                            child: Icon(
+                                              Icons.folder,
+                                              size: 50,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          titulo,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          descricao,
+                                          style: const TextStyle(fontSize: 12),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Positioned(
+                                right: 4,
+                                top: 4,
+                                child: IconButton(
                                   icon: const Icon(Icons.delete,
                                       color: Colors.redAccent),
-                                  onPressed: () {
-                                    // Função futura: excluir imagem
-                                  },
+                                  tooltip: "Excluir imagem",
+                                  onPressed: () => deleteImagem(id),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
       ),
-
-      /// ---------------------- MENU INFERIOR ----------------------
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 3,
         selectedItemColor: const Color(0xFF003b64),
