@@ -15,19 +15,19 @@ class HomeProfScreen extends StatelessWidget {
       backgroundColor: Colors.white,
 
       /// ===========================
-      /// NAVBAR SUPERIOR FMABC
+      /// NAVBAR SUPERIOR (PADRONIZADA)
       /// ===========================
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
-        child: Container(
-          color: const Color(0xFF003b64),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // LOGO E TÍTULO
-              Padding(
-                padding: const EdgeInsets.only(left: 20),
-                child: Row(
+        child: SafeArea(
+          child: Container(
+            color: const Color(0xFF003b64),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // LOGO + TÍTULO
+                Row(
                   children: [
                     Image.asset(
                       'lib/assets/logo.png',
@@ -45,12 +45,9 @@ class HomeProfScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
 
-              // BOTÃO DE SAIR
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: ElevatedButton.icon(
+                // BOTÃO DE SAIR
+                ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, '/');
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -74,8 +71,8 @@ class HomeProfScreen extends StatelessWidget {
                   icon: const Icon(Icons.logout),
                   label: const Text("Sair"),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -88,7 +85,6 @@ class HomeProfScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== TÍTULO CENTRAL =====
             const Center(
               child: Text(
                 "Atlas de Histologia - Modo Professor",
@@ -109,7 +105,6 @@ class HomeProfScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
 
-            // ===== SEÇÃO DE DIRETÓRIOS =====
             const Text(
               "Diretórios Mais Usados",
               style: TextStyle(
@@ -120,7 +115,6 @@ class HomeProfScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // ===== GRID DE DIRETÓRIOS =====
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -135,7 +129,10 @@ class HomeProfScreen extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: const Color(0xFF009245), width: 2),
+                        border: Border.all(
+                          color: const Color(0xFF009245),
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
@@ -186,7 +183,6 @@ class HomeProfScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF009245),
         child: const Icon(Icons.add, color: Colors.white),
       ),
-
     );
   }
 }
