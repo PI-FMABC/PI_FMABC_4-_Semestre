@@ -208,24 +208,6 @@ class AddFolderScreen extends StatelessWidget {
         ),
       ),
 
-      /// ---------------------- MENU INFERIOR ----------------------
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        selectedItemColor: const Color(0xFF003b64),
-        unselectedItemColor: Colors.grey[600],
-        onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/prof');
-          if (i == 1) Navigator.pushReplacementNamed(context, '/folders_prof');
-          if (i == 2) Navigator.pushNamed(context, '/index_prof');
-          if (i == 3) Navigator.pushNamed(context, '/gallery_prof');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Pastas"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
-      ),
     );
   }
 }
