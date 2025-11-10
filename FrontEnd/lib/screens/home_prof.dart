@@ -187,26 +187,6 @@ class HomeProfScreen extends StatelessWidget {
         child: const Icon(Icons.add, color: Colors.white),
       ),
 
-      /// ===========================
-      /// MENU INFERIOR
-      /// ===========================
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (i) {
-          if (i == 0) _navigateToRoute(context, '/prof');
-          if (i == 1) _navigateToRoute(context, '/folders_prof');
-          if (i == 2) _navigateToRoute(context, '/index_prof');
-          if (i == 3) _navigateToRoute(context, '/gallery_prof');
-        },
-        selectedItemColor: const Color(0xFF009245),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Diretórios"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
-      ),
     );
   }
 }
