@@ -14,7 +14,9 @@ class IndexProfScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// NAVBAR SUPERIOR FMABC
+      /// ===========================
+      /// NAVBAR SUPERIOR
+      /// ===========================
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
@@ -22,7 +24,7 @@ class IndexProfScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // LOGO E TÍTULO
+              // LOGO + TÍTULO
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Row(
@@ -78,68 +80,91 @@ class IndexProfScreen extends StatelessWidget {
         ),
       ),
 
+      /// ===========================
       /// CORPO PRINCIPAL
-      body: Row(
-        children: [
-          /// ======== BARRA LATERAL ========
-          Container(
-            width: 200,
-            color: Colors.grey[100],
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Índice de Imagens",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Color(0xFF003b64),
+      /// ===========================
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            children: [
+              /// ===== MENU SUPERIOR =====
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                ),
-                const Divider(thickness: 1.2),
-                Expanded(
-                  child: ListView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      ListTile(
-                        title: const Text("Epitélio Escamoso"),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        title: const Text("Células Basais"),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        title: const Text("Células Colunares"),
-                        onTap: () {},
-                      ),
+                      _buildMenuButton(context, "Home",
+                          onTap: () => _navigateToRoute(context, '/prof')),
+                      _buildMenuButton(context, "Tópicos",
+                          onTap: () => _navigateToRoute(context, '/folders_prof')),
+                      _buildMenuButton(context, "Galeria",
+                          onTap: () => _navigateToRoute(context, '/gallery_prof')),
+                      _buildMenuButton(context, "Índice", isActive: true),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          /// ======== ÁREA PRINCIPAL ========
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
+              const SizedBox(height: 28),
+
+              /// ===== ÁREA DE CONTEÚDO =====
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Imagens do Índice",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color(0xFF003b64),
+                  /// ==== SIDEBAR ====
+                  Container(
+                    width: 200,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Índice de Imagens",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF003b64),
+                          ),
+                        ),
+                        const Divider(thickness: 1),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Epitélio Escamoso"),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Células Basais"),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Células Colunares"),
+                          onTap: () {},
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
 
-                  // GRID DE IMAGENS
+                  const SizedBox(width: 20),
+
+                  /// ==== GRID DE IMAGENS ====
                   Expanded(
                     child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 4,
@@ -155,50 +180,34 @@ class IndexProfScreen extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFF003b64),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                                  color: const Color(0xFF003b64), width: 1.5),
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            padding: const EdgeInsets.all(10),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Expanded(
                                   child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(8)),
+                                    borderRadius: BorderRadius.circular(6),
                                     child: Image.asset(
                                       'assets/folder_image.png',
                                       fit: BoxFit.cover,
-                                      width: double.infinity,
                                       errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.image_outlined,
-                                              color: Color(0xFF003b64), size: 40),
+                                          const Icon(
+                                        Icons.image_outlined,
+                                        color: Color(0xFF003b64),
+                                        size: 40,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFEFEFEF),
-                                    borderRadius: BorderRadius.vertical(
-                                        bottom: Radius.circular(8)),
-                                  ),
-                                  child: const Text(
-                                    "Imagem Exemplo",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF003b64),
-                                    ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  "Imagem Exemplo",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF003b64),
                                   ),
                                 ),
                               ],
@@ -210,28 +219,46 @@ class IndexProfScreen extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 36),
+
+              /// ===== RODAPÉ =====
+              Center(
+                child: Text(
+                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
 
-      /// MENU INFERIOR
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        selectedItemColor: const Color(0xFF009245),
-        unselectedItemColor: Colors.grey,
-        onTap: (i) {
-          if (i == 0) _navigateToRoute(context, '/prof');
-          if (i == 1) _navigateToRoute(context, '/folders_prof');
-          if (i == 2) _navigateToRoute(context, '/index_prof');
-          if (i == 3) _navigateToRoute(context, '/gallery_prof');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Diretórios"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
+     
+    );
+  }
+
+  /// ===== BOTÃO DE MENU (PADRÃO NAVBAR INTERNA) =====
+  Widget _buildMenuButton(BuildContext context, String label,
+      {bool isActive = false, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF003b64) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

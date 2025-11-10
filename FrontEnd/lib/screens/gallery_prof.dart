@@ -131,34 +131,58 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF003b64),
-        title: const Text(
-          "Atlas de Citologia - Modo Professor",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextButton.icon(
-              onPressed: () => Navigator.pushReplacementNamed(context, '/'),
-              icon: const Icon(Icons.logout, color: Color(0xFF003b64)),
-              label: const Text(
-                "Sair",
-                style: TextStyle(
-                  color: Color(0xFF003b64),
-                  fontWeight: FontWeight.bold,
+      backgroundColor: Colors.white,
+
+      /// ===== NAVBAR SUPERIOR PADRONIZADA =====
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          color: const Color(0xFF003b64),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'lib/assets/logo.png',
+                      height: 55,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Atlas de Histologia",
+                      style: TextStyle(
+                        color: Color(0xFF009245),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF003b64),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.logout),
+                  label: const Text("Sair"),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
+
+      /// ===== CONTEÚDO PRINCIPAL =====
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -277,23 +301,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 3,
-        selectedItemColor: const Color(0xFF003b64),
-        unselectedItemColor: Colors.grey[600],
-        onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/prof');
-          if (i == 1) Navigator.pushReplacementNamed(context, '/folders_prof');
-          if (i == 2) Navigator.pushReplacementNamed(context, '/index_prof');
-          if (i == 3) Navigator.pushReplacementNamed(context, '/gallery_prof');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Pastas"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Índice"),
-          BottomNavigationBarItem(icon: Icon(Icons.image), label: "Galeria"),
-        ],
       ),
     );
   }
