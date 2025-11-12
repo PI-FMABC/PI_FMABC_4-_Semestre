@@ -107,9 +107,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   }
 
   void _showAddTopicDialog() {
-    final _tituloController = TextEditingController();
-    final _descricaoController = TextEditingController();
-    final _imgController = TextEditingController();
+    final tituloController = TextEditingController();
+    final descricaoController = TextEditingController();
+    final imgController = TextEditingController();
 
     showDialog(
       context: context,
@@ -120,15 +120,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _tituloController,
+                controller: tituloController,
                 decoration: const InputDecoration(labelText: "Título"),
               ),
               TextField(
-                controller: _descricaoController,
+                controller: descricaoController,
                 decoration: const InputDecoration(labelText: "Descrição"),
               ),
               TextField(
-                controller: _imgController,
+                controller: imgController,
                 decoration: const InputDecoration(labelText: "Link da imagem"),
               ),
             ],
@@ -141,9 +141,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
+              final titulo = tituloController.text.trim();
+              final descricao = descricaoController.text.trim();
+              final img = imgController.text.trim();
 
               if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
 
@@ -158,11 +158,11 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   }
 
   void _showEditTopicDialog(Map<String, dynamic> folder) {
-    final _tituloController =
+    final tituloController =
         TextEditingController(text: folder['titulo'] ?? '');
-    final _descricaoController =
+    final descricaoController =
         TextEditingController(text: folder['descricao'] ?? '');
-    final _imgController = TextEditingController(
+    final imgController = TextEditingController(
         text: (folder['listIMG'] != null && folder['listIMG'].isNotEmpty)
             ? folder['listIMG'][0]
             : '');
@@ -176,15 +176,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _tituloController,
+                controller: tituloController,
                 decoration: const InputDecoration(labelText: "Título"),
               ),
               TextField(
-                controller: _descricaoController,
+                controller: descricaoController,
                 decoration: const InputDecoration(labelText: "Descrição"),
               ),
               TextField(
-                controller: _imgController,
+                controller: imgController,
                 decoration: const InputDecoration(labelText: "Link da imagem"),
               ),
             ],
@@ -197,9 +197,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
+              final titulo = tituloController.text.trim();
+              final descricao = descricaoController.text.trim();
+              final img = imgController.text.trim();
 
               if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
 

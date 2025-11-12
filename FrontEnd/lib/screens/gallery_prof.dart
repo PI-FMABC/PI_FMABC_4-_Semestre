@@ -76,9 +76,9 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
   }
 
   void _showAddImagemDialog() {
-    final _nomeNaPastaController = TextEditingController();
-    final _nomeImagemController = TextEditingController();
-    final _descricaoController = TextEditingController();
+    final nomeNaPastaController = TextEditingController();
+    final nomeImagemController = TextEditingController();
+    final descricaoController = TextEditingController();
 
     showDialog(
       context: context,
@@ -89,15 +89,15 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _nomeNaPastaController,
+                controller: nomeNaPastaController,
                 decoration: const InputDecoration(labelText: "Nome da pasta"),
               ),
               TextField(
-                controller: _nomeImagemController,
+                controller: nomeImagemController,
                 decoration: const InputDecoration(labelText: "Nome da imagem"),
               ),
               TextField(
-                controller: _descricaoController,
+                controller: descricaoController,
                 decoration: const InputDecoration(labelText: "Descrição"),
               ),
             ],
@@ -110,13 +110,15 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final nomeNaPasta = _nomeNaPastaController.text.trim();
-              final nomeImagem = _nomeImagemController.text.trim();
-              final descricao = _descricaoController.text.trim();
+              final nomeNaPasta = nomeNaPastaController.text.trim();
+              final nomeImagem = nomeImagemController.text.trim();
+              final descricao = descricaoController.text.trim();
 
               if (nomeNaPasta.isEmpty ||
                   nomeImagem.isEmpty ||
-                  descricao.isEmpty) return;
+                  descricao.isEmpty) {
+                return;
+              }
 
               await _addImagemToDB(nomeNaPasta, nomeImagem, descricao);
               Navigator.pop(context);

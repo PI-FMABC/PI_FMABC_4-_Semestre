@@ -134,11 +134,11 @@ class HomeScreen extends StatelessWidget {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Bem-vindo ao Atlas Digital de Histologia",
                           style: TextStyle(
                             fontSize: 20,
-                            color: const Color(0xFF003b64),
+                            color: Color(0xFF003b64),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

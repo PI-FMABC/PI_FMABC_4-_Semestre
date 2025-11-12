@@ -5,7 +5,7 @@ const { getPreviewImagePath } = require("./previewHelper");
 const path = require("path");
 require("dotenv").config();
 
-const app = express(); 
+const app = express();
 app.use(express.json());
 app.use(cors());
 
@@ -15,7 +15,6 @@ app.use("/tiles", express.static(path.join(__dirname, "../Tiles")));
 //rotas:
 const Diretorio = require("./diretorioSchema");
 const InfoImagem = require("./infoImagemSchema");
-
 
 app.use(express.json());
 app.use(cors());
@@ -122,6 +121,7 @@ app.put("/diretorio/:id", async (req, res) => {
         titulo: req.body.titulo,
         descricao: req.body.descricao,
         listIMG: req.body.listIMG,
+        id: req.body.id,
       },
       { new: true, runValidators: true } // retorna o item atualizado e executa validações
     );
@@ -202,6 +202,7 @@ app.put("/infoimagem/:id", async (req, res) => {
         nomeNaPasta: req.body.nomeNaPasta,
         nomeImagem: req.body.nomeImagem,
         descricao: req.body.descricao,
+        ListaDosDiretorios: req.body.ListaDosDiretorios,
       },
       { new: true, runValidators: true }
     );
