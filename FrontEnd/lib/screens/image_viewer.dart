@@ -142,7 +142,7 @@ class ImageViewerScreen extends StatelessWidget {
               /// ===== RODAPÉ =====
               Center(
                 child: Text(
-                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
+                  "© ${DateTime.now().year} FMABC — Atlas Digital de Histologia",
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: Responsive.isMobile(context) ? 12 : 14,
