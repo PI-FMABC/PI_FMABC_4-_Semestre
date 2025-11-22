@@ -51,7 +51,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   }
 
   Future<void> _addTopicToDB(
-      String titulo, String descricao, String img) async {
+      String titulo, String descricao, List<String> imgs) async {
     try {
       final response = await http.post(
         Uri.parse('http://localhost:3000/diretorio'),
@@ -59,7 +59,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         body: json.encode({
           'titulo': titulo,
           'descricao': descricao,
-          'listIMG': [img],
+          'listIMG': imgs,
         }),
       );
 
@@ -76,7 +76,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   }
 
   Future<void> _editTopicInDB(
-      String id, String titulo, String descricao, String img) async {
+      String id, String titulo, String descricao, List<String> imgs) async {
     try {
       final response = await http.put(
         Uri.parse('http://localhost:3000/diretorio/$id'),
@@ -84,7 +84,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         body: json.encode({
           'titulo': titulo,
           'descricao': descricao,
-          'listIMG': [img],
+          'listIMG': imgs,
         }),
       );
 
@@ -94,7 +94,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
           setState(() {
             folders[index]['titulo'] = titulo;
             folders[index]['descricao'] = descricao;
-            folders[index]['listIMG'] = [img];
+            folders[index]['listIMG'] = imgs;
           });
         }
       } else {
@@ -128,7 +128,8 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
               ),
               TextField(
                 controller: _imgController,
-                decoration: const InputDecoration(labelText: "Link da imagem"),
+                decoration: const InputDecoration(
+                    labelText: "IDs das imagens (separados por vírgula)"),
               ),
             ],
           ),
@@ -142,11 +143,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             onPressed: () async {
               final titulo = _tituloController.text.trim();
               final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
+              final imgs = _imgController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
 
-              if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
+              if (titulo.isEmpty || descricao.isEmpty) return;
 
-              await _addTopicToDB(titulo, descricao, img);
+              await _addTopicToDB(titulo, descricao, imgs);
               Navigator.pop(context);
             },
             child: const Text("Adicionar"),
@@ -163,7 +168,12 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         TextEditingController(text: folder['descricao'] ?? '');
     final _imgController = TextEditingController(
         text: (folder['listIMG'] != null && folder['listIMG'].isNotEmpty)
-            ? folder['listIMG'][0]
+            ? folder['listIMG'].map((img) {
+                if (img is Map && img['_id'] != null) {
+                  return img['_id'];
+                }
+                return img.toString();
+              }).join(',')
             : '');
 
     showDialog(
@@ -184,7 +194,8 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
               ),
               TextField(
                 controller: _imgController,
-                decoration: const InputDecoration(labelText: "Link da imagem"),
+                decoration: const InputDecoration(
+                    labelText: "IDs das imagens (separados por vírgula)"),
               ),
             ],
           ),
@@ -198,11 +209,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             onPressed: () async {
               final titulo = _tituloController.text.trim();
               final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
+              final imgs = _imgController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
 
-              if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
+              if (titulo.isEmpty || descricao.isEmpty) return;
 
-              await _editTopicInDB(folder['_id'], titulo, descricao, img);
+              await _editTopicInDB(folder['_id'], titulo, descricao, imgs);
               Navigator.pop(context);
             },
             child: const Text("Salvar"),
@@ -216,8 +231,6 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      /// ===== NAVBAR SUPERIOR PADRONIZADA =====
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
@@ -265,8 +278,6 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
           ),
         ),
       ),
-
-      /// ===== CONTEÚDO PRINCIPAL =====
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -315,8 +326,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                         final String titulo = folder['titulo'] ?? 'Sem título';
                         final String descricao =
                             folder['descricao'] ?? 'Sem descrição';
-                        final List listIMG =
-                            (folder['listIMG'] ?? []) as List<dynamic>;
+                        final List listIMG = (folder['listIMG'] ?? []) as List;
 
                         return Card(
                           color: Colors.white,
@@ -364,6 +374,12 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                             children: listIMG
                                                 .take(3)
                                                 .map<Widget>((img) {
+                                              String previewPath = "";
+                                              if (img is Map &&
+                                                  img['previewPath'] != null) {
+                                                previewPath =
+                                                    img['previewPath'];
+                                              }
                                               return Padding(
                                                 padding: const EdgeInsets.only(
                                                     right: 8),
@@ -372,17 +388,26 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                                       BorderRadius.circular(8),
                                                   child: AspectRatio(
                                                     aspectRatio: 1,
-                                                    child: Image.network(
-                                                      img,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder:
-                                                          (_, __, ___) =>
-                                                              const Icon(
-                                                        Icons.broken_image,
-                                                        size: 50,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
+                                                    child: previewPath
+                                                            .isNotEmpty
+                                                        ? Image.network(
+                                                            "http://localhost:3000/tiles/$previewPath",
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (_, __, ___) =>
+                                                                    const Icon(
+                                                              Icons
+                                                                  .broken_image,
+                                                              size: 50,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                          )
+                                                        : const Icon(
+                                                            Icons.broken_image,
+                                                            size: 50,
+                                                            color: Colors.grey,
+                                                          ),
                                                   ),
                                                 ),
                                               );
@@ -442,8 +467,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                                     Navigator.pop(context);
                                                     deleteFolder(id);
                                                   },
-                                                  child:
-                                                      const Text("Excluir"),
+                                                  child: const Text("Excluir"),
                                                 ),
                                               ],
                                             ),

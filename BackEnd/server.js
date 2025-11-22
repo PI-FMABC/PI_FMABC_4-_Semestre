@@ -5,20 +5,16 @@ const { getPreviewImagePath } = require("./previewHelper");
 const path = require("path");
 require("dotenv").config();
 
-const app = express(); 
+const app = express();
 app.use(express.json());
 app.use(cors());
 
 // Permite acesso público às pastas dentro de Tiles
 app.use("/tiles", express.static(path.join(__dirname, "../Tiles")));
 
-//rotas:
+// Schemas
 const Diretorio = require("./diretorioSchema");
 const InfoImagem = require("./infoImagemSchema");
-
-
-app.use(express.json());
-app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,14 +25,14 @@ async function start() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log(" Conectado ao MongoDB");
+    console.log("Conectado ao MongoDB");
 
     app.listen(PORT, () =>
-      console.log(` Servidor rodando em http://localhost:${PORT}`)
+      console.log(`Servidor rodando em http://localhost:${PORT}`)
     );
   } catch (err) {
-    console.error(" MongoDB erro de conexão:", err);
-    process.exit(1); // encerra para evitar comportamento inconsistente
+    console.error("MongoDB erro de conexão:", err);
+    process.exit(1);
   }
 }
 start();
@@ -54,128 +50,172 @@ app.get("/test", async (req, res) => {
   }
 });
 
-// Parte de Diretorio:
-// Criar novo item
+/// ======================= ROTAS DE DIRETÓRIO =======================
+
+// Criar diretório com vinculação de imagens
 app.post("/diretorio", async (req, res) => {
   try {
-    console.log(" Tentando criar item no diretório...");
-    const item = new Diretorio(req.body);
+    const { titulo, descricao, listIMG = [] } = req.body;
+    const item = new Diretorio({ titulo, descricao, listIMG });
     const respMongo = await item.save();
-    console.log(" Item criado com sucesso:", respMongo);
+
+    if (listIMG.length > 0) {
+      await InfoImagem.updateMany(
+        { _id: { $in: listIMG } },
+        { $addToSet: { diretorios: respMongo._id } }
+      );
+    }
+
     res.status(201).json(respMongo);
   } catch (erro) {
-    console.log(" Erro ao criar item:", erro.message);
     res.status(400).json({ erro: erro.message });
   }
 });
 
-// Listar todos os itens
+// Listar diretórios com preview das imagens
 app.get("/diretorio", async (req, res) => {
   try {
-    const itens = await Diretorio.find();
-    res.status(200).json(itens);
+    const itens = await Diretorio.find().populate("listIMG");
+    const itensComPreview = itens.map((d) => ({
+      ...d.toObject(),
+      listIMG: d.listIMG.map((img) => ({
+        ...img.toObject(),
+        previewPath: (() => {
+          try {
+            return getPreviewImagePath(img.nomeNaPasta);
+          } catch (e) {
+            return "";
+          }
+        })(),
+      })),
+    }));
+    res.status(200).json(itensComPreview);
   } catch (erro) {
-    console.log("Erro ao listar itens:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-// Buscar item pelo ID
+// Buscar diretório pelo ID
 app.get("/diretorio/:id", async (req, res) => {
   try {
-    const item = await Diretorio.findById(req.params.id);
+    const item = await Diretorio.findById(req.params.id).populate("listIMG");
     if (!item) return res.status(404).json({ erro: "Item não encontrado" });
-    res.status(200).json(item);
+    const itemComPreview = {
+      ...item.toObject(),
+      listIMG: item.listIMG.map((img) => ({
+        ...img.toObject(),
+        previewPath: (() => {
+          try {
+            return getPreviewImagePath(img.nomeNaPasta);
+          } catch (e) {
+            return "";
+          }
+        })(),
+      })),
+    };
+    res.status(200).json(itemComPreview);
   } catch (erro) {
-    console.log("Erro ao buscar item:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-//  Remover item pelo ID
-app.delete("/diretorio/:id", async (req, res) => {
-  try {
-    const item = await Diretorio.findByIdAndDelete(req.params.id);
-    if (!item)
-      return res
-        .status(404)
-        .json({ erro: "Item não encontrado para exclusão" });
-
-    console.log("Item removido com sucesso:", item._id);
-    res.status(200).json({
-      message: "Item removido com sucesso",
-      item,
-    });
-  } catch (erro) {
-    console.log("Erro ao remover item:", erro.message);
-    res.status(500).json({ erro: erro.message });
-  }
-});
-
-// Atualizar item pelo ID
+// Atualizar diretório
 app.put("/diretorio/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const updatedItem = await Diretorio.findByIdAndUpdate(
-      id,
-      {
-        titulo: req.body.titulo,
-        descricao: req.body.descricao,
-        listIMG: req.body.listIMG,
-      },
-      { new: true, runValidators: true } // retorna o item atualizado e executa validações
+    const { titulo, descricao, listIMG = [] } = req.body;
+
+    const diretorio = await Diretorio.findById(id);
+    if (!diretorio)
+      return res.status(404).json({ erro: "Item não encontrado" });
+
+    // Remove vínculo antigo das imagens
+    await InfoImagem.updateMany(
+      { _id: { $in: diretorio.listIMG } },
+      { $pull: { diretorios: id } }
     );
 
-    if (!updatedItem) {
-      return res.status(404).json({ erro: "Item não encontrado para edição" });
+    diretorio.titulo = titulo;
+    diretorio.descricao = descricao;
+    diretorio.listIMG = listIMG;
+    await diretorio.save();
+
+    // Adiciona vínculo novo
+    if (listIMG.length > 0) {
+      await InfoImagem.updateMany(
+        { _id: { $in: listIMG } },
+        { $addToSet: { diretorios: id } }
+      );
     }
 
-    console.log("Item atualizado com sucesso:", updatedItem._id);
-    res.status(200).json(updatedItem);
+    res.status(200).json(diretorio);
   } catch (erro) {
-    console.log("Erro ao editar item:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-//Parte das Imagens
-// ==================== PARTE DE INFOIMAGEM ====================
-// Criar nova imagem
+// Deletar diretório
+app.delete("/diretorio/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const diretorio = await Diretorio.findByIdAndDelete(id);
+    if (!diretorio)
+      return res.status(404).json({ erro: "Item não encontrado" });
+
+    await InfoImagem.updateMany(
+      { _id: { $in: diretorio.listIMG } },
+      { $pull: { diretorios: id } }
+    );
+
+    res.status(200).json({ message: "Item removido", item: diretorio });
+  } catch (erro) {
+    res.status(500).json({ erro: erro.message });
+  }
+});
+
+/// ======================= ROTAS DE INFOIMAGEM =======================
+
+// Criar imagem com vinculação a diretórios
 app.post("/infoimagem", async (req, res) => {
   try {
-    console.log("Tentando criar registro de imagem...");
-    const imagem = new InfoImagem(req.body);
+    const { nomeNaPasta, nomeImagem, descricao, diretorios = [] } = req.body;
+    const imagem = new InfoImagem({
+      nomeNaPasta,
+      nomeImagem,
+      descricao,
+      diretorios,
+    });
     const respMongo = await imagem.save();
-    console.log("Imagem criada com sucesso:", respMongo);
+
+    if (diretorios.length > 0) {
+      await Diretorio.updateMany(
+        { _id: { $in: diretorios } },
+        { $addToSet: { listIMG: respMongo._id } }
+      );
+    }
+
     res.status(201).json(respMongo);
   } catch (erro) {
-    console.log("Erro ao criar imagem:", erro.message);
     res.status(400).json({ erro: erro.message });
   }
 });
 
-// Listar todas as imagens
 // Listar todas as imagens com preview
 app.get("/infoimagem", async (req, res) => {
   try {
-    const imagens = await InfoImagem.find();
-
-    const imagensComPreview = imagens.map((img) => {
-      let previewPath = "";
-      try {
-        previewPath = getPreviewImagePath(img.nomeNaPasta);
-      } catch (err) {
-        console.error(err.message);
-      }
-      return {
-        ...img.toObject(),
-        previewPath, // caminho relativo ou absoluto da imagem preview
-      };
-    });
-
+    const imagens = await InfoImagem.find().populate("diretorios");
+    const imagensComPreview = imagens.map((img) => ({
+      ...img.toObject(),
+      previewPath: (() => {
+        try {
+          return getPreviewImagePath(img.nomeNaPasta);
+        } catch (e) {
+          return "";
+        }
+      })(),
+    }));
     res.status(200).json(imagensComPreview);
   } catch (erro) {
-    console.log("Erro ao listar imagens:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
@@ -183,64 +223,82 @@ app.get("/infoimagem", async (req, res) => {
 // Buscar imagem pelo ID
 app.get("/infoimagem/:id", async (req, res) => {
   try {
-    const imagem = await InfoImagem.findById(req.params.id);
+    const imagem = await InfoImagem.findById(req.params.id).populate(
+      "diretorios"
+    );
     if (!imagem) return res.status(404).json({ erro: "Imagem não encontrada" });
-    res.status(200).json(imagem);
+
+    const imagemComPreview = {
+      ...imagem.toObject(),
+      previewPath: (() => {
+        try {
+          return getPreviewImagePath(imagem.nomeNaPasta);
+        } catch (e) {
+          return "";
+        }
+      })(),
+    };
+
+    res.status(200).json(imagemComPreview);
   } catch (erro) {
-    console.log("Erro ao buscar imagem:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-// Atualizar imagem pelo ID
+// Atualizar imagem
 app.put("/infoimagem/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const updatedImagem = await InfoImagem.findByIdAndUpdate(
-      id,
-      {
-        nomeNaPasta: req.body.nomeNaPasta,
-        nomeImagem: req.body.nomeImagem,
-        descricao: req.body.descricao,
-      },
-      { new: true, runValidators: true }
+    const { nomeNaPasta, nomeImagem, descricao, diretorios = [] } = req.body;
+
+    const imagem = await InfoImagem.findById(id);
+    if (!imagem) return res.status(404).json({ erro: "Imagem não encontrada" });
+
+    // Remove vínculo antigo
+    await Diretorio.updateMany(
+      { _id: { $in: imagem.diretorios } },
+      { $pull: { listIMG: id } }
     );
 
-    if (!updatedImagem) {
-      return res
-        .status(404)
-        .json({ erro: "Imagem não encontrada para edição" });
+    imagem.nomeNaPasta = nomeNaPasta;
+    imagem.nomeImagem = nomeImagem;
+    imagem.descricao = descricao;
+    imagem.diretorios = diretorios;
+    await imagem.save();
+
+    // Adiciona vínculo novo
+    if (diretorios.length > 0) {
+      await Diretorio.updateMany(
+        { _id: { $in: diretorios } },
+        { $addToSet: { listIMG: id } }
+      );
     }
 
-    console.log("Imagem atualizada com sucesso:", updatedImagem._id);
-    res.status(200).json(updatedImagem);
+    res.status(200).json(imagem);
   } catch (erro) {
-    console.log("Erro ao editar imagem:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-// Remover imagem pelo ID
+// Deletar imagem
 app.delete("/infoimagem/:id", async (req, res) => {
   try {
-    const imagem = await InfoImagem.findByIdAndDelete(req.params.id);
-    if (!imagem)
-      return res
-        .status(404)
-        .json({ erro: "Imagem não encontrada para exclusão" });
+    const id = req.params.id;
+    const imagem = await InfoImagem.findByIdAndDelete(id);
+    if (!imagem) return res.status(404).json({ erro: "Imagem não encontrada" });
 
-    console.log("Imagem removida com sucesso:", imagem._id);
-    res.status(200).json({
-      message: "Imagem removida com sucesso",
-      imagem,
-    });
+    await Diretorio.updateMany(
+      { _id: { $in: imagem.diretorios } },
+      { $pull: { listIMG: id } }
+    );
+
+    res.status(200).json({ message: "Imagem removida", imagem });
   } catch (erro) {
-    console.log("Erro ao remover imagem:", erro.message);
     res.status(500).json({ erro: erro.message });
   }
 });
 
-// middleware de erro genérico
+// Middleware de erro genérico
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(err.status || 500).json({ erro: err.message || "Erro interno" });
