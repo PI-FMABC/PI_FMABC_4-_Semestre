@@ -319,24 +319,42 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Expanded(
-                                    child: previewPath.isNotEmpty
-                                        ? Image.network(
-                                            "http://localhost:3000/tiles/$previewPath",
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                const Icon(
-                                              Icons.broken_image,
-                                              size: 50,
-                                              color: Colors.grey,
-                                            ),
-                                          )
-                                        : const Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              size: 50,
-                                              color: Colors.grey,
-                                            ),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            content: const Text(
+                                                "aqui entra o código do Leo"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text("Fechar"),
+                                              ),
+                                            ],
                                           ),
+                                        );
+                                      },
+                                      child: previewPath.isNotEmpty
+                                          ? Image.network(
+                                              "http://localhost:3000/tiles/$previewPath",
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  const Icon(
+                                                Icons.broken_image,
+                                                size: 50,
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                          : const Center(
+                                              child: Icon(
+                                                Icons.image,
+                                                size: 50,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                    ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),

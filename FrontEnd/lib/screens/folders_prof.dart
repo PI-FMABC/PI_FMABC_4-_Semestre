@@ -112,7 +112,6 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             .toList()
         : [];
 
-    // Novo: Set para imagens marcadas para desvincular
     Set<String> markedForRemoval = {};
 
     showDialog(
@@ -200,7 +199,6 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                 final descricao = _descricaoController.text.trim();
                 if (titulo.isEmpty || descricao.isEmpty) return;
 
-                // Atualiza selectedImgs removendo as marcadas
                 final finalImgs = selectedImgs
                     .where((imgId) => !markedForRemoval.contains(imgId))
                     .toList();
@@ -367,31 +365,69 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                               return Padding(
                                                 padding: const EdgeInsets.only(
                                                     right: 8),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: AspectRatio(
-                                                    aspectRatio: 1,
-                                                    child: previewPath
-                                                            .isNotEmpty
-                                                        ? Image.network(
-                                                            "http://localhost:3000/tiles/$previewPath",
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder:
-                                                                (_, __, ___) =>
-                                                                    const Icon(
-                                                              Icons
-                                                                  .broken_image,
-                                                              size: 50,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
-                                                          )
-                                                        : const Icon(
-                                                            Icons.broken_image,
-                                                            size: 50,
-                                                            color: Colors.grey,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (_) =>
+                                                          AlertDialog(
+                                                        title: const Text(
+                                                            "Preview clicado"),
+                                                        content: const Text(
+                                                            "aqui entra o código do Leo"),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    context),
+                                                            child: const Text(
+                                                                "Fechar"),
                                                           ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.black,
+                                                          width: 2),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      child: AspectRatio(
+                                                        aspectRatio: 1,
+                                                        child: previewPath
+                                                                .isNotEmpty
+                                                            ? Image.network(
+                                                                "http://localhost:3000/tiles/$previewPath",
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorBuilder: (_,
+                                                                        __,
+                                                                        ___) =>
+                                                                    const Icon(
+                                                                  Icons
+                                                                      .broken_image,
+                                                                  size: 50,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              )
+                                                            : const Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                size: 50,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               );
