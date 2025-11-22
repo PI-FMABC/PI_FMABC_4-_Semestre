@@ -11,11 +11,13 @@ class FoldersProfScreen extends StatefulWidget {
 
 class _FoldersProfScreenState extends State<FoldersProfScreen> {
   List<dynamic> folders = [];
+  List<dynamic> images = [];
 
   @override
   void initState() {
     super.initState();
     fetchFolders();
+    fetchImages();
   }
 
   Future<void> fetchFolders() async {
@@ -31,6 +33,22 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
       }
     } catch (e) {
       debugPrint('Erro ao buscar pastas: $e');
+    }
+  }
+
+  Future<void> fetchImages() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/infoimagem'));
+      if (response.statusCode == 200) {
+        setState(() {
+          images = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar imagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar imagens: $e');
     }
   }
 
@@ -50,136 +68,54 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     }
   }
 
-  Future<void> _addTopicToDB(
-      String titulo, String descricao, List<String> imgs) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/diretorio'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'titulo': titulo,
-          'descricao': descricao,
-          'listIMG': imgs,
-        }),
-      );
+  Future<void> addOrEditFolder({
+    String? id,
+    required String titulo,
+    required String descricao,
+    required List<String> imgs,
+  }) async {
+    final uri = id == null
+        ? Uri.parse('http://localhost:3000/diretorio')
+        : Uri.parse('http://localhost:3000/diretorio/$id');
+    final method = id == null ? 'POST' : 'PUT';
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() {
-          folders.add(json.decode(response.body));
-        });
-      } else {
-        debugPrint('Erro ao adicionar tópico: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao adicionar tópico: $e');
+    final response = await (method == 'POST'
+        ? http.post(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'titulo': titulo,
+              'descricao': descricao,
+              'listIMG': imgs,
+            }))
+        : http.put(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'titulo': titulo,
+              'descricao': descricao,
+              'listIMG': imgs,
+            })));
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+          'Erro ao ${id == null ? "adicionar" : "editar"} pasta: ${response.statusCode}');
     }
   }
 
-  Future<void> _editTopicInDB(
-      String id, String titulo, String descricao, List<String> imgs) async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:3000/diretorio/$id'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'titulo': titulo,
-          'descricao': descricao,
-          'listIMG': imgs,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final index = folders.indexWhere((folder) => folder['_id'] == id);
-        if (index != -1) {
-          setState(() {
-            folders[index]['titulo'] = titulo;
-            folders[index]['descricao'] = descricao;
-            folders[index]['listIMG'] = imgs;
-          });
-        }
-      } else {
-        debugPrint('Erro ao editar tópico: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao editar tópico: $e');
-    }
-  }
-
-  void _showAddTopicDialog() {
-    final _tituloController = TextEditingController();
-    final _descricaoController = TextEditingController();
-    final _imgController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Adicionar Tópico"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tituloController,
-                decoration: const InputDecoration(labelText: "Título"),
-              ),
-              TextField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(labelText: "Descrição"),
-              ),
-              TextField(
-                controller: _imgController,
-                decoration: const InputDecoration(
-                    labelText: "IDs das imagens (separados por vírgula)"),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              final imgs = _imgController.text
-                  .split(',')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
-              if (titulo.isEmpty || descricao.isEmpty) return;
-
-              await _addTopicToDB(titulo, descricao, imgs);
-              Navigator.pop(context);
-            },
-            child: const Text("Adicionar"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditTopicDialog(Map<String, dynamic> folder) {
+  void _showFolderDialog(BuildContext context, {Map<String, dynamic>? folder}) {
     final _tituloController =
-        TextEditingController(text: folder['titulo'] ?? '');
+        TextEditingController(text: folder != null ? folder['titulo'] : '');
     final _descricaoController =
-        TextEditingController(text: folder['descricao'] ?? '');
-    final _imgController = TextEditingController(
-        text: (folder['listIMG'] != null && folder['listIMG'].isNotEmpty)
-            ? folder['listIMG'].map((img) {
-                if (img is Map && img['_id'] != null) {
-                  return img['_id'];
-                }
-                return img.toString();
-              }).join(',')
-            : '');
+        TextEditingController(text: folder != null ? folder['descricao'] : '');
+    List<String> selectedImgs = folder != null && folder['listIMG'] != null
+        ? (folder['listIMG'] as List)
+            .map<String>((img) => img['_id'] ?? img.toString())
+            .toList()
+        : [];
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Editar Tópico"),
+      builder: (_) => AlertDialog(
+        title: Text(folder == null ? "Adicionar Tópico" : "Editar Tópico"),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -188,14 +124,50 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                 controller: _tituloController,
                 decoration: const InputDecoration(labelText: "Título"),
               ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _descricaoController,
                 decoration: const InputDecoration(labelText: "Descrição"),
               ),
-              TextField(
-                controller: _imgController,
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: selectedImgs.isNotEmpty ? selectedImgs.first : null,
+                items: images
+                    .map((img) => DropdownMenuItem<String>(
+                          value: img['_id'],
+                          child: Text(img['nomeImagem'] ?? 'Sem nome'),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      if (!selectedImgs.contains(value))
+                        selectedImgs.add(value);
+                    });
+                  }
+                },
                 decoration: const InputDecoration(
-                    labelText: "IDs das imagens (separados por vírgula)"),
+                    labelText: "Selecionar imagens (click para adicionar)"),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                children: selectedImgs
+                    .map((imgId) => Chip(
+                          label: Text(
+                            images.firstWhere((i) => i['_id'] == imgId,
+                                    orElse: () => {
+                                          'nomeImagem': 'Desconhecido'
+                                        })['nomeImagem'] ??
+                                'Desconhecido',
+                          ),
+                          onDeleted: () {
+                            setState(() {
+                              selectedImgs.remove(imgId);
+                            });
+                          },
+                        ))
+                    .toList(),
               ),
             ],
           ),
@@ -209,18 +181,18 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             onPressed: () async {
               final titulo = _tituloController.text.trim();
               final descricao = _descricaoController.text.trim();
-              final imgs = _imgController.text
-                  .split(',')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
               if (titulo.isEmpty || descricao.isEmpty) return;
 
-              await _editTopicInDB(folder['_id'], titulo, descricao, imgs);
+              await addOrEditFolder(
+                id: folder?['_id'],
+                titulo: titulo,
+                descricao: descricao,
+                imgs: selectedImgs,
+              );
+              await fetchFolders();
               Navigator.pop(context);
             },
-            child: const Text("Salvar"),
+            child: Text(folder == null ? "Adicionar" : "Salvar"),
           ),
         ],
       ),
@@ -281,24 +253,17 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(child: Container()),
                 ElevatedButton.icon(
-                  onPressed: _showAddTopicDialog,
+                  onPressed: () => _showFolderDialog(context),
                   icon: const Icon(Icons.add),
                   label: const Text("Adicionar Tópico"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF003b64),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 14, horizontal: 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                 ),
               ],
@@ -322,11 +287,11 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                       itemCount: folders.length,
                       itemBuilder: (context, index) {
                         final folder = folders[index];
-                        final String id = folder['_id'] ?? '';
-                        final String titulo = folder['titulo'] ?? 'Sem título';
-                        final String descricao =
+                        final id = folder['_id'] ?? '';
+                        final titulo = folder['titulo'] ?? 'Sem título';
+                        final descricao =
                             folder['descricao'] ?? 'Sem descrição';
-                        final List listIMG = (folder['listIMG'] ?? []) as List;
+                        final listIMG = (folder['listIMG'] ?? []) as List;
 
                         return Card(
                           color: Colors.white,
@@ -336,8 +301,6 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                           ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/index_prof'),
                             child: Stack(
                               children: [
                                 Padding(
@@ -353,15 +316,14 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                           fontSize: 16,
                                           color: Color(0xFF003b64),
                                         ),
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
                                         descricao,
                                         style: const TextStyle(
-                                            color: Colors.black87,
-                                            fontSize: 14,
-                                            height: 1.3),
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                        ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -371,10 +333,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                           height: 100,
                                           child: ListView(
                                             scrollDirection: Axis.horizontal,
-                                            children: listIMG
-                                                .take(3)
-                                                .map<Widget>((img) {
-                                              String previewPath = "";
+                                            children:
+                                                listIMG.map<Widget>((img) {
+                                              String previewPath = '';
                                               if (img is Map &&
                                                   img['previewPath'] != null) {
                                                 previewPath =
@@ -436,15 +397,17 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                         icon: const Icon(Icons.edit,
                                             color: Color(0xFF003b64)),
                                         tooltip: "Editar Tópico",
-                                        onPressed: () =>
-                                            _showEditTopicDialog(folder),
+                                        onPressed: () => _showFolderDialog(
+                                            context,
+                                            folder: folder),
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.delete,
                                             color: Colors.redAccent),
                                         tooltip: "Excluir pasta",
-                                        onPressed: () {
-                                          showDialog(
+                                        onPressed: () async {
+                                          final confirm =
+                                              await showDialog<bool>(
                                             context: context,
                                             builder: (_) => AlertDialog(
                                               title:
@@ -454,24 +417,27 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
-                                                      Navigator.pop(context),
+                                                      Navigator.pop(
+                                                          context, false),
                                                   child: const Text("Cancelar"),
                                                 ),
                                                 ElevatedButton(
                                                   style:
                                                       ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.redAccent,
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    deleteFolder(id);
-                                                  },
+                                                          backgroundColor:
+                                                              Colors.redAccent),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context, true),
                                                   child: const Text("Excluir"),
                                                 ),
                                               ],
                                             ),
                                           );
+
+                                          if (confirm == true) {
+                                            await deleteFolder(id);
+                                          }
                                         },
                                       ),
                                     ],

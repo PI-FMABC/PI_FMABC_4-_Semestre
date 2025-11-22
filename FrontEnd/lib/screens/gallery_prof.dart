@@ -11,11 +11,13 @@ class GalleryProfScreen extends StatefulWidget {
 
 class _GalleryProfScreenState extends State<GalleryProfScreen> {
   List<dynamic> imagens = [];
+  List<dynamic> folders = [];
 
   @override
   void initState() {
     super.initState();
     fetchImagens();
+    fetchFolders();
   }
 
   Future<void> fetchImagens() async {
@@ -34,7 +36,43 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     }
   }
 
+  Future<void> fetchFolders() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/diretorio'));
+      if (response.statusCode == 200) {
+        setState(() {
+          folders = json.decode(response.body);
+        });
+      } else {
+        debugPrint('Erro ao carregar pastas: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar pastas: $e');
+    }
+  }
+
   Future<void> deleteImagem(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Excluir imagem"),
+        content: const Text("Tem certeza que deseja excluir esta imagem?"),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancelar")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Excluir"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
     try {
       final response =
           await http.delete(Uri.parse('http://localhost:3000/infoimagem/$id'));
@@ -50,8 +88,12 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     }
   }
 
-  Future<void> _addImagemToDB(
-      String nomeNaPasta, String nomeImagem, String descricao) async {
+  Future<void> _addImagemToDB({
+    required String nomeNaPasta,
+    required String nomeImagem,
+    required String descricao,
+    required String folderId,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('http://localhost:3000/infoimagem'),
@@ -60,6 +102,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
           'nomeNaPasta': nomeNaPasta,
           'nomeImagem': nomeImagem,
           'descricao': descricao,
+          'diretorios': [folderId],
         }),
       );
 
@@ -79,6 +122,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     final _nomeNaPastaController = TextEditingController();
     final _nomeImagemController = TextEditingController();
     final _descricaoController = TextEditingController();
+    String? selectedFolderId;
 
     showDialog(
       context: context,
@@ -100,6 +144,22 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                 controller: _descricaoController,
                 decoration: const InputDecoration(labelText: "Descrição"),
               ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: selectedFolderId,
+                decoration: const InputDecoration(
+                  labelText: "Vincular a um Tópico",
+                ),
+                items: folders.map<DropdownMenuItem<String>>((folder) {
+                  return DropdownMenuItem<String>(
+                    value: folder['_id'],
+                    child: Text(folder['titulo'] ?? 'Sem título'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  selectedFolderId = value;
+                },
+              ),
             ],
           ),
         ),
@@ -116,10 +176,19 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
 
               if (nomeNaPasta.isEmpty ||
                   nomeImagem.isEmpty ||
-                  descricao.isEmpty) return;
+                  descricao.isEmpty ||
+                  selectedFolderId == null) return;
 
-              await _addImagemToDB(nomeNaPasta, nomeImagem, descricao);
+              await _addImagemToDB(
+                nomeNaPasta: nomeNaPasta,
+                nomeImagem: nomeImagem,
+                descricao: descricao,
+                folderId: selectedFolderId!,
+              );
+
               Navigator.pop(context);
+              await fetchImagens();
+              await fetchFolders();
             },
             child: const Text("Adicionar"),
           ),
@@ -132,8 +201,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      /// ===== NAVBAR SUPERIOR PADRONIZADA =====
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
@@ -181,8 +248,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
           ),
         ),
       ),
-
-      /// ===== CONTEÚDO PRINCIPAL =====
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -197,11 +262,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF003b64),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 14, horizontal: 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                 ),
               ],
@@ -232,8 +292,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                         return Card(
                           elevation: 3,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                              borderRadius: BorderRadius.circular(12)),
                           child: Stack(
                             children: [
                               Column(
@@ -242,7 +301,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                   Expanded(
                                     child: previewPath.isNotEmpty
                                         ? Image.network(
-                                            'http://localhost:3000/tiles/${previewPath.replaceAll("\\", "/")}',
+                                            'http://localhost:3000/tiles/$previewPath',
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) =>
                                                 const Icon(
