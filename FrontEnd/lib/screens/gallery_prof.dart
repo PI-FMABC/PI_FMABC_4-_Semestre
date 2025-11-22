@@ -53,26 +53,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
   }
 
   Future<void> deleteImagem(String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Excluir imagem"),
-        content: const Text("Tem certeza que deseja excluir esta imagem?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("Cancelar")),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Excluir"),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
     try {
       final response =
           await http.delete(Uri.parse('http://localhost:3000/infoimagem/$id'));
@@ -88,112 +68,148 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     }
   }
 
-  Future<void> _addImagemToDB({
+  Future<void> addOrEditImagem({
+    String? id,
     required String nomeNaPasta,
     required String nomeImagem,
     required String descricao,
-    required String folderId,
+    required List<String> listFolders,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/infoimagem'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'nomeNaPasta': nomeNaPasta,
-          'nomeImagem': nomeImagem,
-          'descricao': descricao,
-          'diretorios': [folderId],
-        }),
-      );
+    final uri = id == null
+        ? Uri.parse('http://localhost:3000/infoimagem')
+        : Uri.parse('http://localhost:3000/infoimagem/$id');
+    final method = id == null ? 'POST' : 'PUT';
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() {
-          imagens.add(json.decode(response.body));
-        });
-      } else {
-        debugPrint('Erro ao adicionar imagem: ${response.body}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao adicionar imagem: $e');
+    final response = await (method == 'POST'
+        ? http.post(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'nomeNaPasta': nomeNaPasta,
+              'nomeImagem': nomeImagem,
+              'descricao': descricao,
+              'diretorios': listFolders,
+            }))
+        : http.put(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'nomeNaPasta': nomeNaPasta,
+              'nomeImagem': nomeImagem,
+              'descricao': descricao,
+              'diretorios': listFolders,
+            })));
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+          'Erro ao ${id == null ? "adicionar" : "editar"} imagem: ${response.statusCode}');
     }
   }
 
-  void _showAddImagemDialog() {
-    final _nomeNaPastaController = TextEditingController();
-    final _nomeImagemController = TextEditingController();
-    final _descricaoController = TextEditingController();
-    String? selectedFolderId;
+  void _showImagemDialog(BuildContext context, {Map<String, dynamic>? img}) {
+    final _nomeNaPastaController =
+        TextEditingController(text: img?['nomeNaPasta'] ?? '');
+    final _nomeImagemController =
+        TextEditingController(text: img?['nomeImagem'] ?? '');
+    final _descricaoController =
+        TextEditingController(text: img?['descricao'] ?? '');
+    List<String> selectedFolders = img?['diretorios'] != null
+        ? (img!['diretorios'] as List)
+            .map<String>((f) => f is Map ? f['_id'] as String : f.toString())
+            .toList()
+        : [];
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Adicionar Imagem"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _nomeNaPastaController,
-                decoration: const InputDecoration(labelText: "Nome da pasta"),
-              ),
-              TextField(
-                controller: _nomeImagemController,
-                decoration: const InputDecoration(labelText: "Nome da imagem"),
-              ),
-              TextField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(labelText: "Descrição"),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: selectedFolderId,
-                decoration: const InputDecoration(
-                  labelText: "Vincular a um Tópico",
+      builder: (_) => StatefulBuilder(builder: (context, setDialogState) {
+        return AlertDialog(
+          title: Text(img == null ? "Adicionar Imagem" : "Editar Imagem"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _nomeNaPastaController,
+                  decoration: const InputDecoration(labelText: "Nome da pasta"),
                 ),
-                items: folders.map<DropdownMenuItem<String>>((folder) {
-                  return DropdownMenuItem<String>(
-                    value: folder['_id'],
-                    child: Text(folder['titulo'] ?? 'Sem título'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  selectedFolderId = value;
-                },
-              ),
-            ],
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _nomeImagemController,
+                  decoration:
+                      const InputDecoration(labelText: "Nome da imagem"),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descricaoController,
+                  decoration: const InputDecoration(labelText: "Descrição"),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: null,
+                  decoration:
+                      const InputDecoration(labelText: "Adicionar pasta"),
+                  items: folders.map((folder) {
+                    return DropdownMenuItem<String>(
+                      value: folder['_id'],
+                      child: Text(folder['titulo'] ?? 'Sem título'),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null && !selectedFolders.contains(value)) {
+                      setDialogState(() {
+                        selectedFolders.add(value);
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  children: selectedFolders.map((folderId) {
+                    final folderName = folders.firstWhere(
+                            (f) => f['_id'] == folderId,
+                            orElse: () =>
+                                {'titulo': 'Desconhecido'})['titulo'] ??
+                        'Desconhecido';
+                    return Chip(
+                      label: Text(folderName),
+                      onDeleted: () {
+                        setDialogState(() {
+                          selectedFolders.remove(folderId);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final nomeNaPasta = _nomeNaPastaController.text.trim();
-              final nomeImagem = _nomeImagemController.text.trim();
-              final descricao = _descricaoController.text.trim();
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancelar")),
+            ElevatedButton(
+              onPressed: () async {
+                final nomeNaPasta = _nomeNaPastaController.text.trim();
+                final nomeImagem = _nomeImagemController.text.trim();
+                final descricao = _descricaoController.text.trim();
+                if (nomeNaPasta.isEmpty ||
+                    nomeImagem.isEmpty ||
+                    descricao.isEmpty) return;
 
-              if (nomeNaPasta.isEmpty ||
-                  nomeImagem.isEmpty ||
-                  descricao.isEmpty ||
-                  selectedFolderId == null) return;
-
-              await _addImagemToDB(
-                nomeNaPasta: nomeNaPasta,
-                nomeImagem: nomeImagem,
-                descricao: descricao,
-                folderId: selectedFolderId!,
-              );
-
-              Navigator.pop(context);
-              await fetchImagens();
-              await fetchFolders();
-            },
-            child: const Text("Adicionar"),
-          ),
-        ],
-      ),
+                await addOrEditImagem(
+                  id: img?['_id'],
+                  nomeNaPasta: nomeNaPasta,
+                  nomeImagem: nomeImagem,
+                  descricao: descricao,
+                  listFolders: selectedFolders,
+                );
+                await fetchImagens();
+                Navigator.pop(context);
+              },
+              child: Text(img == null ? "Adicionar" : "Salvar"),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -256,7 +272,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: _showAddImagemDialog,
+                  onPressed: () => _showImagemDialog(context),
                   icon: const Icon(Icons.add),
                   label: const Text("Adicionar Imagem"),
                   style: ElevatedButton.styleFrom(
@@ -266,7 +282,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Expanded(
               child: imagens.isEmpty
                   ? const Center(
@@ -278,21 +294,25 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 4,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.9,
                       ),
                       itemCount: imagens.length,
                       itemBuilder: (context, index) {
                         final img = imagens[index];
+                        final id = img['_id'] ?? '';
                         final titulo = img['nomeImagem'] ?? 'Sem título';
                         final descricao = img['descricao'] ?? '';
-                        final id = img['_id'] ?? '';
                         final previewPath = img['previewPath'] ?? '';
+                        final listFolders = img['diretorios'] ?? [];
 
                         return Card(
+                          color: Colors.white,
                           elevation: 3,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Stack(
                             children: [
                               Column(
@@ -301,7 +321,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                   Expanded(
                                     child: previewPath.isNotEmpty
                                         ? Image.network(
-                                            'http://localhost:3000/tiles/$previewPath',
+                                            "http://localhost:3000/tiles/$previewPath",
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) =>
                                                 const Icon(
@@ -312,7 +332,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                           )
                                         : const Center(
                                             child: Icon(
-                                              Icons.folder,
+                                              Icons.image,
                                               size: 50,
                                               color: Colors.grey,
                                             ),
@@ -345,11 +365,51 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                               Positioned(
                                 right: 4,
                                 top: 4,
-                                child: IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.redAccent),
-                                  tooltip: "Excluir imagem",
-                                  onPressed: () => deleteImagem(id),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Color(0xFF003b64)),
+                                      tooltip: "Editar imagem",
+                                      onPressed: () =>
+                                          _showImagemDialog(context, img: img),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.redAccent),
+                                      tooltip: "Excluir imagem",
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            title: const Text("Excluir imagem"),
+                                            content: Text(
+                                                "Tem certeza que deseja excluir '$titulo'?"),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context, false),
+                                                  child:
+                                                      const Text("Cancelar")),
+                                              ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                          backgroundColor:
+                                                              Colors.redAccent),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context, true),
+                                                  child: const Text("Excluir")),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          await deleteImagem(id);
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

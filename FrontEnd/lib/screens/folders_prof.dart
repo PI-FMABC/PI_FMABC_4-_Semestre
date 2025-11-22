@@ -112,90 +112,113 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             .toList()
         : [];
 
+    // Novo: Set para imagens marcadas para desvincular
+    Set<String> markedForRemoval = {};
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(folder == null ? "Adicionar Tópico" : "Editar Tópico"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tituloController,
-                decoration: const InputDecoration(labelText: "Título"),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(labelText: "Descrição"),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedImgs.isNotEmpty ? selectedImgs.first : null,
-                items: images
-                    .map((img) => DropdownMenuItem<String>(
-                          value: img['_id'],
-                          child: Text(img['nomeImagem'] ?? 'Sem nome'),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      if (!selectedImgs.contains(value))
-                        selectedImgs.add(value);
-                    });
-                  }
-                },
-                decoration: const InputDecoration(
-                    labelText: "Selecionar imagens (click para adicionar)"),
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 6,
-                children: selectedImgs
-                    .map((imgId) => Chip(
-                          label: Text(
-                            images.firstWhere((i) => i['_id'] == imgId,
-                                    orElse: () => {
-                                          'nomeImagem': 'Desconhecido'
-                                        })['nomeImagem'] ??
-                                'Desconhecido',
-                          ),
-                          onDeleted: () {
-                            setState(() {
-                              selectedImgs.remove(imgId);
-                            });
-                          },
-                        ))
-                    .toList(),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              if (titulo.isEmpty || descricao.isEmpty) return;
+      builder: (_) => StatefulBuilder(builder: (context, setDialogState) {
+        return AlertDialog(
+          title: Text(folder == null ? "Adicionar Tópico" : "Editar Tópico"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _tituloController,
+                  decoration: const InputDecoration(labelText: "Título"),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descricaoController,
+                  decoration: const InputDecoration(labelText: "Descrição"),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedImgs.isNotEmpty ? selectedImgs.first : null,
+                  items: images
+                      .map((img) => DropdownMenuItem<String>(
+                            value: img['_id'],
+                            child: Text(img['nomeImagem'] ?? 'Sem nome'),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() {
+                        if (!selectedImgs.contains(value))
+                          selectedImgs.add(value);
+                      });
+                    }
+                  },
+                  decoration: const InputDecoration(
+                      labelText: "Selecionar imagens (click para adicionar)"),
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  children: selectedImgs.map((imgId) {
+                    final imgName = images.firstWhere((i) => i['_id'] == imgId,
+                            orElse: () =>
+                                {'nomeImagem': 'Desconhecido'})['nomeImagem'] ??
+                        'Desconhecido';
+                    final isMarked = markedForRemoval.contains(imgId);
 
-              await addOrEditFolder(
-                id: folder?['_id'],
-                titulo: titulo,
-                descricao: descricao,
-                imgs: selectedImgs,
-              );
-              await fetchFolders();
-              Navigator.pop(context);
-            },
-            child: Text(folder == null ? "Adicionar" : "Salvar"),
+                    return GestureDetector(
+                      onTap: () {
+                        setDialogState(() {
+                          if (isMarked) {
+                            markedForRemoval.remove(imgId);
+                          } else {
+                            markedForRemoval.add(imgId);
+                          }
+                        });
+                      },
+                      child: Chip(
+                        label: Text(imgName),
+                        backgroundColor: isMarked ? Colors.red[100] : null,
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color: isMarked ? Colors.red : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final titulo = _tituloController.text.trim();
+                final descricao = _descricaoController.text.trim();
+                if (titulo.isEmpty || descricao.isEmpty) return;
+
+                // Atualiza selectedImgs removendo as marcadas
+                final finalImgs = selectedImgs
+                    .where((imgId) => !markedForRemoval.contains(imgId))
+                    .toList();
+
+                await addOrEditFolder(
+                  id: folder?['_id'],
+                  titulo: titulo,
+                  descricao: descricao,
+                  imgs: finalImgs,
+                );
+                await fetchFolders();
+                Navigator.pop(context);
+              },
+              child: Text(folder == null ? "Adicionar" : "Salvar"),
+            ),
+          ],
+        );
+      }),
     );
   }
 
