@@ -248,7 +248,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/home_prof'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF003b64),
