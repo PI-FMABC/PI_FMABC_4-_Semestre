@@ -173,7 +173,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildMenuButton(context, "Home",
-                          onTap: () => _navigateToRoute(context, '/home')),
+                          onTap: () => _navigateToRoute(context, '/')),
                       _buildMenuButton(context, "Tópicos", isActive: true),
                       _buildMenuButton(context, "Galeria",
                           onTap: () => _navigateToRoute(context, '/gallery')),
