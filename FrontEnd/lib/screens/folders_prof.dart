@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'responsive.dart';
 
 class FoldersProfScreen extends StatefulWidget {
   const FoldersProfScreen({super.key});
@@ -11,11 +12,13 @@ class FoldersProfScreen extends StatefulWidget {
 
 class _FoldersProfScreenState extends State<FoldersProfScreen> {
   List<dynamic> folders = [];
+  List<dynamic> images = [];
 
   @override
   void initState() {
     super.initState();
     fetchFolders();
+    fetchImages();
   }
 
   Future<void> fetchFolders() async {
@@ -31,6 +34,22 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
       }
     } catch (e) {
       debugPrint('Erro ao buscar pastas: $e');
+    }
+  }
+
+  Future<void> fetchImages() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/infoimagem'));
+      if (response.statusCode == 200) {
+        setState(() {
+          images = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar imagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar imagens: $e');
     }
   }
 
@@ -50,249 +69,319 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     }
   }
 
-  Future<void> _addTopicToDB(
-      String titulo, String descricao, String img) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/diretorio'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'titulo': titulo,
-          'descricao': descricao,
-          'listIMG': [img],
-        }),
-      );
+  Future<void> addOrEditFolder({
+    String? id,
+    required String titulo,
+    required String descricao,
+    required List<String> imgs,
+  }) async {
+    final uri = id == null
+        ? Uri.parse('http://localhost:3000/diretorio')
+        : Uri.parse('http://localhost:3000/diretorio/$id');
+    final method = id == null ? 'POST' : 'PUT';
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() {
-          folders.add(json.decode(response.body));
-        });
-      } else {
-        debugPrint('Erro ao adicionar tópico: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao adicionar tópico: $e');
+    final response = await (method == 'POST'
+        ? http.post(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'titulo': titulo,
+              'descricao': descricao,
+              'listIMG': imgs,
+            }))
+        : http.put(uri,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'titulo': titulo,
+              'descricao': descricao,
+              'listIMG': imgs,
+            })));
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+          'Erro ao ${id == null ? "adicionar" : "editar"} pasta: ${response.statusCode}');
     }
   }
 
-  Future<void> _editTopicInDB(
-      String id, String titulo, String descricao, String img) async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:3000/diretorio/$id'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'titulo': titulo,
-          'descricao': descricao,
-          'listIMG': [img],
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final index = folders.indexWhere((folder) => folder['_id'] == id);
-        if (index != -1) {
-          setState(() {
-            folders[index]['titulo'] = titulo;
-            folders[index]['descricao'] = descricao;
-            folders[index]['listIMG'] = [img];
-          });
-        }
-      } else {
-        debugPrint('Erro ao editar tópico: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao editar tópico: $e');
-    }
-  }
-
-  void _showAddTopicDialog() {
-    final _tituloController = TextEditingController();
-    final _descricaoController = TextEditingController();
-    final _imgController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Adicionar Tópico"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tituloController,
-                decoration: const InputDecoration(labelText: "Título"),
-              ),
-              TextField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(labelText: "Descrição"),
-              ),
-              TextField(
-                controller: _imgController,
-                decoration: const InputDecoration(labelText: "Link da imagem"),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
-
-              if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
-
-              await _addTopicToDB(titulo, descricao, img);
-              Navigator.pop(context);
-            },
-            child: const Text("Adicionar"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditTopicDialog(Map<String, dynamic> folder) {
+  void _showFolderDialog(BuildContext context, {Map<String, dynamic>? folder}) {
     final _tituloController =
-        TextEditingController(text: folder['titulo'] ?? '');
+        TextEditingController(text: folder != null ? folder['titulo'] : '');
     final _descricaoController =
-        TextEditingController(text: folder['descricao'] ?? '');
-    final _imgController = TextEditingController(
-        text: (folder['listIMG'] != null && folder['listIMG'].isNotEmpty)
-            ? folder['listIMG'][0]
-            : '');
+        TextEditingController(text: folder != null ? folder['descricao'] : '');
+    List<String> selectedImgs = folder != null && folder['listIMG'] != null
+        ? (folder['listIMG'] as List)
+            .map<String>((img) => img['_id'] ?? img.toString())
+            .toList()
+        : [];
+
+    Set<String> markedForRemoval = {};
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Editar Tópico"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tituloController,
-                decoration: const InputDecoration(labelText: "Título"),
-              ),
-              TextField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(labelText: "Descrição"),
-              ),
-              TextField(
-                controller: _imgController,
-                decoration: const InputDecoration(labelText: "Link da imagem"),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final titulo = _tituloController.text.trim();
-              final descricao = _descricaoController.text.trim();
-              final img = _imgController.text.trim();
+      builder: (_) => StatefulBuilder(builder: (context, setDialogState) {
+        return AlertDialog(
+          title: Text(folder == null ? "Adicionar Tópico" : "Editar Tópico"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _tituloController,
+                  decoration: const InputDecoration(labelText: "Título"),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descricaoController,
+                  decoration: const InputDecoration(labelText: "Descrição"),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedImgs.isNotEmpty ? selectedImgs.first : null,
+                  items: images
+                      .map((img) => DropdownMenuItem<String>(
+                            value: img['_id'],
+                            child: Text(img['nomeImagem'] ?? 'Sem nome'),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() {
+                        if (!selectedImgs.contains(value))
+                          selectedImgs.add(value);
+                      });
+                    }
+                  },
+                  decoration: const InputDecoration(
+                      labelText: "Selecionar imagens (click para adicionar)"),
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  children: selectedImgs.map((imgId) {
+                    final imgName = images.firstWhere((i) => i['_id'] == imgId,
+                            orElse: () =>
+                                {'nomeImagem': 'Desconhecido'})['nomeImagem'] ??
+                        'Desconhecido';
+                    final isMarked = markedForRemoval.contains(imgId);
 
-              if (titulo.isEmpty || descricao.isEmpty || img.isEmpty) return;
-
-              await _editTopicInDB(folder['_id'], titulo, descricao, img);
-              Navigator.pop(context);
-            },
-            child: const Text("Salvar"),
+                    return GestureDetector(
+                      onTap: () {
+                        setDialogState(() {
+                          if (isMarked) {
+                            markedForRemoval.remove(imgId);
+                          } else {
+                            markedForRemoval.add(imgId);
+                          }
+                        });
+                      },
+                      child: Chip(
+                        label: Text(imgName),
+                        backgroundColor: isMarked ? Colors.red[100] : null,
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color: isMarked ? Colors.red : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final titulo = _tituloController.text.trim();
+                final descricao = _descricaoController.text.trim();
+                if (titulo.isEmpty || descricao.isEmpty) return;
+
+                final finalImgs = selectedImgs
+                    .where((imgId) => !markedForRemoval.contains(imgId))
+                    .toList();
+
+                await addOrEditFolder(
+                  id: folder?['_id'],
+                  titulo: titulo,
+                  descricao: descricao,
+                  imgs: finalImgs,
+                );
+                await fetchFolders();
+                Navigator.pop(context);
+              },
+              child: Text(folder == null ? "Adicionar" : "Salvar"),
+            ),
+          ],
+        );
+      }),
     );
+  }
+
+  void _navigateToRoute(BuildContext context, String routeName) {
+    debugPrint('=== TENTANDO NAVEGAR ===');
+    debugPrint('Rota atual: ${ModalRoute.of(context)?.settings.name}');
+    debugPrint('Rota destino: $routeName');
+    
+    if (ModalRoute.of(context)?.settings.name != routeName) {
+      debugPrint('✅ Navegando para: $routeName');
+      Navigator.pushNamed(context, routeName);
+    } else {
+      debugPrint('❌ Já está na rota: $routeName');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      /// ===== NAVBAR SUPERIOR PADRONIZADA =====
+      
+      /// ===========================
+      /// NAVBAR SUPERIOR - RESPONSIVA
+      /// ===========================
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
+        preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
           color: const Color(0xFF003b64),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 20),
+                padding: EdgeInsets.only(left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
+                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
+                    if (Responsive.isMobile(context) || Responsive.isTablet(context))
+                      Builder(
+                        builder: (context) => IconButton(
+                          icon: const Icon(Icons.menu, color: Colors.white),
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                        ),
+                      ),
                     Image.asset(
                       'lib/assets/logo.png',
-                      height: 55,
+                      height: Responsive.isMobile(context) ? 45 : 55,
                       errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                     ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      "Atlas de Histologia",
-                      style: TextStyle(
-                        color: Color(0xFF009245),
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    SizedBox(width: Responsive.isMobile(context) ? 6 : 10),
+                    Responsive.isMobile(context)
+                        ? const Text(
+                            "Atlas",
+                            style: TextStyle(
+                              color: Color(0xFF009245),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : const Text(
+                            "Atlas de Histologia",
+                            style: TextStyle(
+                              color: Color(0xFF009245),
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF003b64),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              
+              // BOTÃO SAIR APENAS NO DESKTOP (MOBILE FICA NO DRAWER)
+              if (Responsive.isDesktop(context))
+                Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context, 
+                        '/', 
+                        (route) => false
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.green[600],
+                          content: const Text(
+                            'Logout realizado com sucesso!',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF003b64),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text("Sair"),
                   ),
-                  icon: const Icon(Icons.logout),
-                  label: const Text("Sair"),
                 ),
-              ),
             ],
           ),
         ),
       ),
 
-      /// ===== CONTEÚDO PRINCIPAL =====
+      /// ===========================
+      /// DRAWER PARA MOBILE/TABLET
+      /// ===========================
+      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
+          ? _buildDrawer(context) 
+          : null,
+
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+            if (Responsive.isDesktop(context))
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => _navigateToRoute(context, '/prof')),
+                      _buildMenuButton(context, "Tópicos", isActive: true),
+                      _buildMenuButton(context, "Galeria",
+                          onTap: () => _navigateToRoute(context, '/gallery_prof')),
+                    ],
+                  ),
+                ),
+              ),
+
+            if (Responsive.isDesktop(context)) const SizedBox(height: 24),
+
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(child: Container()),
                 ElevatedButton.icon(
-                  onPressed: _showAddTopicDialog,
+                  onPressed: () => _showFolderDialog(context),
                   icon: const Icon(Icons.add),
-                  label: const Text("Adicionar Tópico"),
+                  label: Text(
+                    "Adicionar Tópico",
+                    style: TextStyle(
+                      fontSize: Responsive.isMobile(context) ? 14 : 16,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF003b64),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 14, horizontal: 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
+            
             Expanded(
               child: folders.isEmpty
                   ? const Center(
@@ -301,22 +390,20 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                       ),
                     )
                   : GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.9,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
+                        crossAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        childAspectRatio: Responsive.isMobile(context) ? 0.8 : 0.9,
                       ),
                       itemCount: folders.length,
                       itemBuilder: (context, index) {
                         final folder = folders[index];
-                        final String id = folder['_id'] ?? '';
-                        final String titulo = folder['titulo'] ?? 'Sem título';
-                        final String descricao =
+                        final id = folder['_id'] ?? '';
+                        final titulo = folder['titulo'] ?? 'Sem título';
+                        final descricao =
                             folder['descricao'] ?? 'Sem descrição';
-                        final List listIMG =
-                            (folder['listIMG'] ?? []) as List<dynamic>;
+                        final listIMG = (folder['listIMG'] ?? []) as List;
 
                         return Card(
                           color: Colors.white,
@@ -326,8 +413,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                           ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/index_prof'),
+                            onTap: () {}, // Adicione ação se necessário
                             child: Stack(
                               children: [
                                 Padding(
@@ -338,49 +424,101 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                     children: [
                                       Text(
                                         titulo,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Color(0xFF003b64),
+                                          fontSize: Responsive.isMobile(context) ? 14 : 16,
+                                          color: const Color(0xFF003b64),
                                         ),
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
                                         descricao,
-                                        style: const TextStyle(
-                                            color: Colors.black87,
-                                            fontSize: 14,
-                                            height: 1.3),
+                                        style: TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: Responsive.isMobile(context) ? 12 : 14,
+                                        ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 10),
                                       if (listIMG.isNotEmpty)
                                         SizedBox(
-                                          height: 100,
+                                          height: Responsive.isMobile(context) ? 80 : 100,
                                           child: ListView(
                                             scrollDirection: Axis.horizontal,
-                                            children: listIMG
-                                                .take(3)
-                                                .map<Widget>((img) {
+                                            children:
+                                                listIMG.map<Widget>((img) {
+                                              String previewPath = '';
+                                              if (img is Map &&
+                                                  img['previewPath'] != null) {
+                                                previewPath =
+                                                    img['previewPath'];
+                                              }
                                               return Padding(
                                                 padding: const EdgeInsets.only(
                                                     right: 8),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: AspectRatio(
-                                                    aspectRatio: 1,
-                                                    child: Image.network(
-                                                      img,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder:
-                                                          (_, __, ___) =>
-                                                              const Icon(
-                                                        Icons.broken_image,
-                                                        size: 50,
-                                                        color: Colors.grey,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (_) =>
+                                                          AlertDialog(
+                                                        title: const Text(
+                                                            "Preview clicado"),
+                                                        content: const Text(
+                                                            "aqui entra o código do Leo"),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    context),
+                                                            child: const Text(
+                                                                "Fechar"),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    width: Responsive.isMobile(context) ? 70 : 80,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.black,
+                                                          width: 1.5),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      child: AspectRatio(
+                                                        aspectRatio: 1,
+                                                        child: previewPath
+                                                                .isNotEmpty
+                                                            ? Image.network(
+                                                                "http://localhost:3000/tiles/$previewPath",
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorBuilder: (_,
+                                                                        __,
+                                                                        ___) =>
+                                                                    const Icon(
+                                                                  Icons
+                                                                      .broken_image,
+                                                                  size: 30,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              )
+                                                            : const Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                size: 30,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
                                                       ),
                                                     ),
                                                   ),
@@ -408,46 +546,51 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                   child: Row(
                                     children: [
                                       IconButton(
-                                        icon: const Icon(Icons.edit,
-                                            color: Color(0xFF003b64)),
+                                        icon: Icon(Icons.edit,
+                                            color: const Color(0xFF003b64),
+                                            size: Responsive.isMobile(context) ? 18 : 24),
                                         tooltip: "Editar Tópico",
-                                        onPressed: () =>
-                                            _showEditTopicDialog(folder),
+                                        onPressed: () => _showFolderDialog(
+                                            context,
+                                            folder: folder),
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.redAccent),
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.redAccent,
+                                            size: Responsive.isMobile(context) ? 18 : 24),
                                         tooltip: "Excluir pasta",
-                                        onPressed: () {
-                                          showDialog(
+                                        onPressed: () async {
+                                          final confirm =
+                                              await showDialog<bool>(
                                             context: context,
                                             builder: (_) => AlertDialog(
-                                              title:
-                                                  const Text("Excluir pasta"),
+                                              title: const Text("Excluir pasta"),
                                               content: Text(
                                                   "Tem certeza que deseja excluir '$titulo'?"),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
-                                                      Navigator.pop(context),
+                                                      Navigator.pop(
+                                                          context, false),
                                                   child: const Text("Cancelar"),
                                                 ),
                                                 ElevatedButton(
                                                   style:
                                                       ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.redAccent,
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    deleteFolder(id);
-                                                  },
-                                                  child:
-                                                      const Text("Excluir"),
+                                                          backgroundColor:
+                                                              Colors.redAccent),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context, true),
+                                                  child: const Text("Excluir"),
                                                 ),
                                               ],
                                             ),
                                           );
+
+                                          if (confirm == true) {
+                                            await deleteFolder(id);
+                                          }
                                         },
                                       ),
                                     ],
@@ -461,6 +604,122 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// ===== DRAWER PARA MOBILE/TABLET =====
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFF003b64),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Atlas de Histologia',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Modo Professor',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Home Professor'),
+            onTap: () {
+              Navigator.pop(context);
+              _navigateToRoute(context, '/prof');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.folder),
+            title: const Text('Gerenciar Diretórios'),
+            onTap: () {
+              Navigator.pop(context);
+              _navigateToRoute(context, '/folders_prof');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.image),
+            title: const Text('Gerenciar Galeria'),
+            onTap: () {
+              Navigator.pop(context);
+              _navigateToRoute(context, '/gallery_prof');
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Sair'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green[600],
+                  content: const Text(
+                    'Logout realizado com sucesso!',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuButton(BuildContext context, String label,
+      {bool isActive = false, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            debugPrint('=== BOTÃO $label CLICADO ===');
+            if (onTap == null) {
+              debugPrint('❌ onTap é NULL para: $label');
+            } else {
+              debugPrint('✅ onTap disponível para: $label');
+              onTap();
+            }
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isActive ? const Color(0xFF003b64) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -6,7 +6,7 @@ class HomeProfScreen extends StatelessWidget {
 
   void _navigateToRoute(BuildContext context, String routeName) {
     if (ModalRoute.of(context)?.settings.name != routeName) {
-      Navigator.pushReplacementNamed(context, routeName);
+      Navigator.pushNamed(context, routeName);
     }
   }
 
@@ -67,7 +67,7 @@ class HomeProfScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 20),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/');
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: Colors.green[600],
@@ -502,7 +502,7 @@ class HomeProfScreen extends StatelessWidget {
             title: const Text('Sair'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   backgroundColor: Colors.green[600],
