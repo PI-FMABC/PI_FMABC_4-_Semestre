@@ -7,11 +7,6 @@ const path = require("path");
 require("dotenv").config();
 
 const { getPreviewImagePath } = require("./previewHelper"); // Função que retorna caminho do preview
-app.use(express.json());
-app.use(cors());
-
-// Permite acesso público às pastas dentro de Tiles
-app.use("/tiles", express.static(path.join(__dirname, "../Tiles")));
 
 // rotas:
 const Diretorio = require("./diretorioSchema");
@@ -301,48 +296,6 @@ app.delete("/infoimagem/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
-});
-
-// Parte de admin e professores
-//======== Professor ==========
-// busca todos os professores
-app.get("/professores", async (req, res) => {
-  sqlDB.query("SELECT * FROM professores", (err, results) => {
-    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
-    res.json(results);
-  });
-});
-
-// remove um professor por email
-app.delete("/professores/:email", async (req, res) => {
-  sqlDB.query("DELETE FROM professores WHERE email = ?", [req.params.email], (err) => {
-    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
-    res.status(200).json({
-      message: "Professor removido com sucesso"
-    });
-  });
-});
-
-// Adiciona um professor
-app.post("/professores", async (req, res) => {
-  const hash_senha = await bcrypt.hash(req.body.senha, 12);
-  sqlDB.query("INSERT INTO professores (email, senha, nome) VALUES (?, ?, ?)", [req.body.email, hash_senha, req.body.nome], (err) => {
-    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
-    res.status(200).json({
-      message: "Professor adicionado com sucesso"
-    });
-  });
-});
-
-// edita um professor por email
-app.put("/professores", async (req, res) => {
-  const hash_senha = await bcrypt.hash(req.body.senha, 12);
-  sqlDB.query("UPDATE professores SET email=?, senha=?, nome=? WHERE email=?", [req.body.email, hash_senha, req.body.nome, req.body.oldEmail], (err) => {
-    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
-    res.status(200).json({
-      message: "Professor modificado com sucesso"
-    });
-  });
 });
 
 // Parte de admin e professores
