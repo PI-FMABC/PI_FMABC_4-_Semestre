@@ -12,27 +12,50 @@ class FoldersScreen extends StatefulWidget {
 
 class _FoldersScreenState extends State<FoldersScreen> {
   List<dynamic> folders = [];
+  List<dynamic> images = [];
 
   @override
   void initState() {
     super.initState();
     fetchFolders();
+    fetchImages();
   }
 
   Future<void> fetchFolders() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://localhost:3000/diretorio'),
-      );
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/diretorio'));
       if (response.statusCode == 200) {
         setState(() {
           folders = json.decode(response.body);
         });
       } else {
-        throw Exception('Erro ao carregar dados: ${response.statusCode}');
+        throw Exception('Erro ao carregar pastas: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint("Erro ao buscar diretorios: $e");
+      debugPrint('Erro ao buscar pastas: $e');
+    }
+  }
+
+  Future<void> fetchImages() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/infoimagem'));
+      if (response.statusCode == 200) {
+        setState(() {
+          images = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar imagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar imagens: $e');
+    }
+  }
+
+  void _navigateToRoute(BuildContext context, String routeName) {
+    if (ModalRoute.of(context)?.settings.name != routeName) {
+      Navigator.pushNamed(context, routeName);
     }
   }
 
@@ -42,7 +65,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
       backgroundColor: Colors.white,
 
       /// ===========================
-      /// NAVBAR SUPERIOR
+      /// NAVBAR SUPERIOR - RESPONSIVA
       /// ===========================
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
@@ -52,10 +75,13 @@ class _FoldersScreenState extends State<FoldersScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: Responsive.isMobile(context) ? 12 : 20),
+                padding: EdgeInsets.only(
+                    left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    if (Responsive.isMobile(context) || Responsive.isTablet(context))
+                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
+                    if (Responsive.isMobile(context) ||
+                        Responsive.isTablet(context))
                       Builder(
                         builder: (context) => IconButton(
                           icon: const Icon(Icons.menu, color: Colors.white),
@@ -112,137 +138,165 @@ class _FoldersScreenState extends State<FoldersScreen> {
       /// ===========================
       /// DRAWER PARA MOBILE/TABLET
       /// ===========================
-      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
-          ? _buildDrawer(context) 
+      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
+          ? _buildDrawer(context)
           : null,
 
-      /// ===========================
-      /// CONTEÚDO PRINCIPAL
-      /// ===========================
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.isMobile(context) ? 16 : 32,
-            vertical: Responsive.isMobile(context) ? 16 : 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
-              if (Responsive.isDesktop(context))
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFe5e5e5),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildMenuButton(context, "Home",
-                            onTap: () => Navigator.pushNamed(context, '/')),
-                        _buildMenuButton(context, "Tópicos",
-                            isActive: true,
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/folders')),
-                        _buildMenuButton(context, "Galeria",
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/gallery')),
-                      ],
-                    ),
+      body: Padding(
+        padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
+        child: Column(
+          children: [
+            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+            if (Responsive.isDesktop(context))
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => _navigateToRoute(context, '/')),
+                      _buildMenuButton(context, "Tópicos", isActive: true),
+                      _buildMenuButton(context, "Galeria",
+                          onTap: () => _navigateToRoute(context, '/gallery')),
+                    ],
                   ),
                 ),
-
-              if (Responsive.isDesktop(context)) const SizedBox(height: 28),
-
-              /// ===== GRID DE PASTAS (DINÂMICO) =====
-              folders.isEmpty
+              ),
+            if (Responsive.isDesktop(context)) const SizedBox(height: 24),
+            Expanded(
+              child: folders.isEmpty
                   ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF003b64),
-                        ),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF003b64),
                       ),
                     )
                   : GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: folders.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: Responsive.isMobile(context) ? 1 : 2,
-                        crossAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
+                        crossAxisSpacing:
+                            Responsive.isMobile(context) ? 12 : 16,
                         mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
-                        childAspectRatio: Responsive.isMobile(context) ? 1.5 : 1.3,
+                        childAspectRatio:
+                            Responsive.isMobile(context) ? 0.8 : 0.9,
                       ),
+                      itemCount: folders.length,
                       itemBuilder: (context, index) {
                         final folder = folders[index];
-                        final String titulo = folder['titulo'] ?? 'Sem título';
-                        final String descricao =
+                        final titulo = folder['titulo'] ?? 'Sem título';
+                        final descricao =
                             folder['descricao'] ?? 'Sem descrição';
-                        final List listIMG =
-                            (folder['listIMG'] ?? []) as List<dynamic>;
+                        final listIMG = (folder['listIMG'] ?? []) as List;
 
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/index'),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border:
-                                  Border.all(color: const Color(0xFF003b64)),
-                            ),
-                            padding: EdgeInsets.all(Responsive.isMobile(context) ? 10 : 12),
+                        return Card(
+                          color: Colors.white,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                /// ===== TÍTULO =====
                                 Text(
                                   titulo,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
+                                    fontSize:
+                                        Responsive.isMobile(context) ? 14 : 16,
                                     color: const Color(0xFF003b64),
-                                    fontSize: Responsive.isMobile(context) ? 16 : 18,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
                                 ),
-                                SizedBox(height: Responsive.isMobile(context) ? 4 : 6),
-
-                                /// ===== DESCRIÇÃO =====
+                                const SizedBox(height: 6),
                                 Text(
                                   descricao,
                                   style: TextStyle(
                                     color: Colors.black87,
-                                    fontSize: Responsive.isMobile(context) ? 13 : 14,
-                                    height: 1.3,
+                                    fontSize:
+                                        Responsive.isMobile(context) ? 12 : 14,
                                   ),
-                                  maxLines: Responsive.isMobile(context) ? 3 : 2,
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: Responsive.isMobile(context) ? 8 : 10),
-
-                                /// ===== IMAGENS (caso existam) =====
+                                const SizedBox(height: 10),
                                 if (listIMG.isNotEmpty)
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children:
-                                          listIMG.take(3).map<Widget>((img) {
+                                  SizedBox(
+                                    height:
+                                        Responsive.isMobile(context) ? 80 : 100,
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: listIMG.map<Widget>((img) {
+                                        String previewPath = '';
+                                        if (img is Map &&
+                                            img['previewPath'] != null) {
+                                          previewPath = img['previewPath'];
+                                        }
                                         return Padding(
                                           padding:
-                                              EdgeInsets.only(right: Responsive.isMobile(context) ? 6 : 8),
-                                          child: Image.network(
-                                            img,
-                                            height: Responsive.isMobile(context) ? 50 : 60,
-                                            width: Responsive.isMobile(context) ? 50 : 60,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                Icon(
-                                              Icons.broken_image,
-                                              size: Responsive.isMobile(context) ? 30 : 40,
-                                              color: Colors.grey,
+                                              const EdgeInsets.only(right: 8),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (_) => AlertDialog(
+                                                  title: const Text(
+                                                      "Preview clicado"),
+                                                  content: const Text(
+                                                      "Aqui entra o código do Leo"),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context),
+                                                      child:
+                                                          const Text("Fechar"),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                            child: Container(
+                                              width:
+                                                  Responsive.isMobile(context)
+                                                      ? 70
+                                                      : 80,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.black,
+                                                    width: 1.5),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                child: AspectRatio(
+                                                  aspectRatio: 1,
+                                                  child: previewPath.isNotEmpty
+                                                      ? Image.network(
+                                                          "http://localhost:3000/tiles/$previewPath",
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder:
+                                                              (_, __, ___) =>
+                                                                  const Icon(
+                                                            Icons.broken_image,
+                                                            size: 30,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        )
+                                                      : const Icon(
+                                                          Icons.broken_image,
+                                                          size: 30,
+                                                          color: Colors.grey,
+                                                        ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         );
@@ -250,11 +304,13 @@ class _FoldersScreenState extends State<FoldersScreen> {
                                     ),
                                   )
                                 else
-                                  Center(
-                                    child: Icon(
-                                      Icons.folder,
-                                      size: Responsive.isMobile(context) ? 40 : 50,
-                                      color: const Color(0xFF003b64),
+                                  const Expanded(
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.folder,
+                                        size: 60,
+                                        color: Color(0xFF003b64),
+                                      ),
                                     ),
                                   ),
                               ],
@@ -263,21 +319,8 @@ class _FoldersScreenState extends State<FoldersScreen> {
                         );
                       },
                     ),
-
-              const SizedBox(height: 40),
-
-              /// ===== RODAPÉ =====
-              Center(
-                child: Text(
-                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: Responsive.isMobile(context) ? 12 : 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -295,8 +338,8 @@ class _FoldersScreenState extends State<FoldersScreen> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
+              children: const [
+                Text(
                   'Atlas de Histologia',
                   style: TextStyle(
                     color: Colors.white,
@@ -304,11 +347,11 @@ class _FoldersScreenState extends State<FoldersScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'Navegação',
+                  'Modo Aluno',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white70,
                     fontSize: 14,
                   ),
                 ),
@@ -320,7 +363,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
             title: const Text('Home'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/');
+              _navigateToRoute(context, '/');
             },
           ),
           ListTile(
@@ -328,7 +371,6 @@ class _FoldersScreenState extends State<FoldersScreen> {
             title: const Text('Tópicos'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/folders');
             },
           ),
           ListTile(
@@ -336,15 +378,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
             title: const Text('Galeria'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/gallery');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.list),
-            title: const Text('Índice'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/index');
+              _navigateToRoute(context, '/gallery');
             },
           ),
           const Divider(),
@@ -353,7 +387,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
             title: const Text('Login'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/login');
+              _navigateToRoute(context, '/login');
             },
           ),
         ],
@@ -361,24 +395,27 @@ class _FoldersScreenState extends State<FoldersScreen> {
     );
   }
 
-  /// Botões do menu superior
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF003b64) : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.black,
-              fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isActive ? const Color(0xFF003b64) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
