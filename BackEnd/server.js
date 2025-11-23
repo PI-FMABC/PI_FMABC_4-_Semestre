@@ -1,5 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const sql = require("mysql2");
+const bcrypt = require("bcrypt");
 const cors = require("cors");
 const { getPreviewImagePath } = require("./previewHelper");
 const path = require("path");
@@ -12,17 +14,25 @@ app.use(cors());
 // Permite acesso público às pastas dentro de Tiles
 app.use("/tiles", express.static(path.join(__dirname, "../Tiles")));
 
-//rotas:
+// rotas:
 const Diretorio = require("./diretorioSchema");
 const InfoImagem = require("./infoImagemSchema");
 
+// Variável do SQL
+const sqlDB = sql.createConnection({
+  host: process.env.HOST,
+  port: process.env.SQL_PORT,
+  user:process.env.USER,
+  password: process.env.PASS,
+  database: process.env.DBNAME
+});
 
 app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// Conexão com o MongoDB e inicializa servidor somente após conectar
+// Conexão com o MongoDB e SQL e inicializa servidor somente após conectar
 async function start() {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -239,6 +249,51 @@ app.delete("/infoimagem/:id", async (req, res) => {
     res.status(500).json({ erro: erro.message });
   }
 });
+
+// Parte de admin e professores
+//======== Professor ==========
+// busca todos os professores
+app.get("/professores", async (req, res) => {
+  sqlDB.query("SELECT * FROM professores", (err, results) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    res.json(results);
+  });
+});
+
+// remove um professor por email
+app.delete("/professores/:email", async (req, res) => {
+  sqlDB.query("DELETE FROM professores WHERE email = ?", [req.params.email], (err) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    res.status(200).json({
+      message: "Professor removido com sucesso"
+    });
+  });
+});
+
+// Adiciona um professor
+app.post("/professores", async (req, res) => {
+  const hash_senha = await bcrypt.hash(req.body.senha, 12);
+  sqlDB.query("INSERT INTO professores (email, senha, nome) VALUES (?, ?, ?)", [req.body.email, hash_senha, req.body.nome], (err) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    res.status(200).json({
+      message: "Professor adicionado com sucesso"
+    });
+  });
+});
+
+// edita um professor por email
+app.put("/professores", async (req, res) => {
+  const hash_senha = await bcrypt.hash(req.body.senha, 12);
+  sqlDB.query("UPDATE professores SET email=?, senha=?, nome=? WHERE email=?", [req.body.email, hash_senha, req.body.nome, req.body.oldEmail], (err) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    res.status(200).json({
+      message: "Professor modificado com sucesso"
+    });
+  });
+});
+
+//======== Admin ========
+
 
 // middleware de erro genérico
 app.use((err, req, res, next) => {

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AdmScreen extends StatefulWidget {
   const AdmScreen({super.key});
@@ -9,41 +11,91 @@ class AdmScreen extends StatefulWidget {
 
 class _AdmScreenState extends State<AdmScreen> {
   // Dados de exemplo para professores
-  List<Map<String, String>> professores = [
-    {'nome': 'Dr. Carlos Silva', 'email': 'carlos.silva@fmabc.br', 'senha': '123456'},
-    {'nome': 'Dra. Maria Santos', 'email': 'maria.santos@fmabc.br', 'senha': 'abcdef'},
-    {'nome': 'Dr. João Oliveira', 'email': 'joao.oliveira@fmabc.br', 'senha': 'senha123'},
-  ];
+  List<Map<String, dynamic>> professores = [];
+
+  Future<void> fetchProfessores() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/professores'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          List<dynamic> responseJsonList = json.decode(response.body);
+          professores.clear();
+          professores = List<Map<String, dynamic>>.from(responseJsonList);
+        });
+      } else {
+        throw Exception('Erro ao carregar dados: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Erro ao buscar professores: $e");
+    }
+  }
 
   void _adicionarProfessor(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AddProfessorDialog(
-        onProfessorAdicionado: (novoProfessor) {
-          setState(() {
-            professores.add(novoProfessor);
-          });
+        onProfessorAdicionado: (novoProfessor) async {
+          try {
+            final response = await http.post(
+              Uri.parse('http://localhost:3000/professores'),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({
+                'email': novoProfessor['email'],
+                'nome': novoProfessor['nome'],
+                'senha': novoProfessor['senha'],
+              }),
+            );
+            if (response.statusCode == 200) {
+              setState(() {
+                professores.add(novoProfessor);
+              });
+            } else {
+              throw Exception('Erro ao adicionar dados: ${response.statusCode}');
+            }
+          } catch (e) {
+            debugPrint("Erro ao adicionar professores: $e");
+          }
         },
       ),
     );
   }
 
-  void _editarProfessor(BuildContext context, Map<String, String> professor, int index) {
+  void _editarProfessor(BuildContext context, Map<String, dynamic> professor, int index) {
     showDialog(
       context: context,
       builder: (context) => EditProfessorDialog(
         professor: professor,
         index: index,
-        onProfessorEditado: (professorEditado, index) {
-          setState(() {
-            professores[index] = professorEditado;
-          });
+        onProfessorEditado: (professorEditado, index) async {
+          try {
+            final response = await http.put(
+              Uri.parse('http://localhost:3000/professores'),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({
+                'email': professorEditado['email'],
+                'nome': professorEditado['nome'],
+                'senha': professorEditado['senha'],
+                'oldEmail': professor['email'],
+              }),
+            );
+            if (response.statusCode == 200) {
+              setState(() {
+                professores[index] = professorEditado;
+              });
+            } else {
+              throw Exception('Erro ao editar dados: ${response.statusCode}');
+            }
+          } catch (e) {
+            debugPrint("Erro ao editar professores: $e");
+          }
         },
       ),
     );
   }
 
-  void _deletarProfessor(BuildContext context, Map<String, String> professor, int index) {
+  void _deletarProfessor(BuildContext context, Map<String, dynamic> professor, int index) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -55,19 +107,29 @@ class _AdmScreenState extends State<AdmScreen> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                professores.removeAt(index);
-              });
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                final response = await http.delete(
+                  Uri.parse('http://localhost:3000/professores/${professor['email']}')
+                );
+                if (response.statusCode == 200) {
+                  setState(() {
+                    professores.removeAt(index);
+                  });
+                  Navigator.pop(context);
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.green[600],
+                      content: Text('Professor ${professor['nome']} excluído com sucesso!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint("Erro ao deletar professores: $e");
+              }
               
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green[600],
-                  content: Text('Professor ${professor['nome']} excluído com sucesso!'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -77,6 +139,12 @@ class _AdmScreenState extends State<AdmScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfessores();
   }
 
   @override
@@ -349,7 +417,7 @@ class _AdmScreenState extends State<AdmScreen> {
 /// POPUP PARA ADICIONAR PROFESSOR
 /// ===========================
 class AddProfessorDialog extends StatefulWidget {
-  final Function(Map<String, String>) onProfessorAdicionado;
+  final Function(Map<String, dynamic>) onProfessorAdicionado;
 
   const AddProfessorDialog({super.key, required this.onProfessorAdicionado});
 
@@ -493,9 +561,9 @@ class _AddProfessorDialogState extends State<AddProfessorDialog> {
 /// POPUP PARA EDITAR PROFESSOR
 /// ===========================
 class EditProfessorDialog extends StatefulWidget {
-  final Map<String, String> professor;
+  final Map<String, dynamic> professor;
   final int index;
-  final Function(Map<String, String>, int) onProfessorEditado;
+  final Function(Map<String, dynamic>, int) onProfessorEditado;
 
   const EditProfessorDialog({
     super.key,
