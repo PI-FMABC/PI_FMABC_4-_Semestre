@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'responsive.dart';
 
-class GalleryScreen extends StatelessWidget {
+class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
+
+  @override
+  State<GalleryScreen> createState() => _GalleryScreenState();
+}
+
+class _GalleryScreenState extends State<GalleryScreen> {
+  List<dynamic> imagens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchImagens();
+  }
+
+  Future<void> fetchImagens() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/infoimagem'));
+      if (response.statusCode == 200) {
+        setState(() {
+          imagens = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erro ao carregar imagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar imagens: $e');
+    }
+  }
 
   void _navigateToRoute(BuildContext context, String routeName) {
     if (ModalRoute.of(context)?.settings.name != routeName) {
@@ -15,9 +46,7 @@ class GalleryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
       /// NAVBAR SUPERIOR
-      /// ===========================
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -25,12 +54,13 @@ class GalleryScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // LOGO + TÍTULO
               Padding(
-                padding: EdgeInsets.only(left: Responsive.isMobile(context) ? 12 : 20),
+                padding: EdgeInsets.only(
+                    left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    if (Responsive.isMobile(context) || Responsive.isTablet(context))
+                    if (Responsive.isMobile(context) ||
+                        Responsive.isTablet(context))
                       Builder(
                         builder: (context) => IconButton(
                           icon: const Icon(Icons.menu, color: Colors.white),
@@ -63,8 +93,6 @@ class GalleryScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // BOTÃO LOGIN APENAS NO DESKTOP
               if (Responsive.isDesktop(context))
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
@@ -86,219 +114,170 @@ class GalleryScreen extends StatelessWidget {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
-      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
-          ? _buildDrawer(context) 
+      /// DRAWER MOBILE/TABLET
+      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
+          ? _buildDrawer(context)
           : null,
 
-      /// ===========================
       /// CONTEÚDO PRINCIPAL
-      /// ===========================
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.isMobile(context) ? 16 : 32,
-            vertical: Responsive.isMobile(context) ? 16 : 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
-              if (Responsive.isDesktop(context))
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFe5e5e5),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildMenuButton(context, "Home",
-                            onTap: () => Navigator.pushNamed(context, '/')),
-                        _buildMenuButton(context, "Tópicos",
-                            onTap: () => Navigator.pushNamed(context, '/folders')),
-                        _buildMenuButton(context, "Galeria", isActive: true),
-                      ],
-                    ),
-                  ),
-                ),
-
-              if (Responsive.isDesktop(context)) const SizedBox(height: 28),
-
-              /// ===== TÍTULO =====
-              Text(
-                "Galeria Geral de Imagens",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: Responsive.isMobile(context) ? 20 : 24,
-                  color: const Color(0xFF003b64),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              /// ===== CAMPO DE BUSCA =====
-              Responsive.isMobile(context)
-                  ? Column(
-                      children: [
-                        TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Buscar por imagens...',
-                            prefixIcon: const Icon(Icons.search),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: Color(0xFF003b64)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF009245),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          onChanged: (value) {
-                            // lógica de busca
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // ação de busca
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF003b64),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            icon: const Icon(Icons.search),
-                            label: const Text("Buscar"),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Buscar por imagens...',
-                              prefixIcon: const Icon(Icons.search),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                              filled: true,
-                              fillColor: Colors.grey[100],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(color: Color(0xFF003b64)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF009245),
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              // lógica de busca
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // ação de busca
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF003b64),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          icon: const Icon(Icons.search),
-                          label: const Text("Buscar"),
-                        ),
-                      ],
-                    ),
-
-              const SizedBox(height: 28),
-
-              /// ===== GRID DE IMAGENS =====
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 20,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: Responsive.isMobile(context)
-                      ? 2
-                      : Responsive.isTablet(context)
-                          ? 3
-                          : 5,
-                  crossAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
-                  mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
-                  childAspectRatio: 1,
-                ),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/image-viewer'),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: const Color(0xFF003b64)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          'assets/folder_image.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.image_outlined,
-                            size: Responsive.isMobile(context) ? 30 : 50,
-                            color: const Color(0xFF003b64),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 36),
-
-              /// ===== RODAPÉ =====
+      body: Padding(
+        padding: EdgeInsets.all(Responsive.isMobile(context) ? 16 : 20),
+        child: Column(
+          children: [
+            /// MENU SUPERIOR DESKTOP
+            if (Responsive.isDesktop(context))
               Center(
-                child: Text(
-                  "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: Responsive.isMobile(context) ? 12 : 14,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFe5e5e5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuButton(context, "Home",
+                          onTap: () => _navigateToRoute(context, '/')),
+                      _buildMenuButton(context, "Tópicos",
+                          onTap: () => _navigateToRoute(context, '/folders')),
+                      _buildMenuButton(context, "Galeria", isActive: true),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+
+            if (Responsive.isDesktop(context)) const SizedBox(height: 24),
+
+            /// GRID DE IMAGENS
+            Expanded(
+              child: imagens.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF003b64),
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: Responsive.isMobile(context)
+                            ? 2
+                            : Responsive.isTablet(context)
+                                ? 3
+                                : 4,
+                        crossAxisSpacing:
+                            Responsive.isMobile(context) ? 12 : 16,
+                        mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        childAspectRatio:
+                            Responsive.isMobile(context) ? 0.8 : 0.9,
+                      ),
+                      itemCount: imagens.length,
+                      itemBuilder: (context, index) {
+                        final img = imagens[index];
+                        final titulo = img['nomeImagem'] ?? 'Sem título';
+                        final descricao = img['descricao'] ?? '';
+                        final previewPath = img['previewPath'] ?? '';
+
+                        return Card(
+                          color: Colors.white,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            content: const Text(
+                                                "aqui entra o código do Leo"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text("Fechar"),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      child: previewPath.isNotEmpty
+                                          ? Image.network(
+                                              "http://localhost:3000/tiles/$previewPath",
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Icon(
+                                                Icons.broken_image,
+                                                size:
+                                                    Responsive.isMobile(context)
+                                                        ? 40
+                                                        : 50,
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                          : const Center(
+                                              child: Icon(
+                                                Icons.image,
+                                                size: 50,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(
+                                        Responsive.isMobile(context) ? 6 : 8),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          titulo,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize:
+                                                Responsive.isMobile(context)
+                                                    ? 12
+                                                    : 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          descricao,
+                                          style: TextStyle(
+                                            fontSize:
+                                                Responsive.isMobile(context)
+                                                    ? 10
+                                                    : 12,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
+  /// DRAWER MOBILE/TABLET
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -376,7 +355,7 @@ class GalleryScreen extends StatelessWidget {
     );
   }
 
-  /// ===== BOTÃO DE MENU =====
+  /// BOTÃO DE MENU DESKTOP
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(
