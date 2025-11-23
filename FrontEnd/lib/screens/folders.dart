@@ -118,20 +118,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/', (route) => false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.green[600],
-                          content: const Text(
-                            'Logout realizado com sucesso!',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    onPressed: () => Navigator.pushNamed(context, '/login'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFF003b64),
@@ -139,8 +126,8 @@ class _FoldersScreenState extends State<FoldersScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    icon: const Icon(Icons.logout),
-                    label: const Text("Sair"),
+                    icon: const Icon(Icons.person),
+                    label: const Text("Login"),
                   ),
                 ),
             ],
@@ -181,9 +168,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
                   ),
                 ),
               ),
-
             if (Responsive.isDesktop(context)) const SizedBox(height: 24),
-
             Expanded(
               child: folders.isEmpty
                   ? const Center(
@@ -378,7 +363,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
             title: const Text('Home'),
             onTap: () {
               Navigator.pop(context);
-              _navigateToRoute(context, '/home');
+              _navigateToRoute(context, '/');
             },
           ),
           ListTile(
@@ -398,21 +383,11 @@ class _FoldersScreenState extends State<FoldersScreen> {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Sair'),
+            leading: const Icon(Icons.person),
+            title: const Text('Login'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green[600],
-                  content: const Text(
-                    'Logout realizado com sucesso!',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              _navigateToRoute(context, '/login');
             },
           ),
         ],
