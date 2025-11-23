@@ -340,7 +340,73 @@ app.put("/professores", async (req, res) => {
   });
 });
 
+// valida o login de um professor
+app.post("/professores/login", async (req, res) => {
+  sqlDB.query("SELECT email, senha FROM professores WHERE email=?", [req.body.email], async (err, results) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    let resultEmail;
+    let resultSenha;
+    let senhaIgual
+    console.log(results)
+    if (results.length > 0) {
+      resultEmail = results[0]['email'];
+      resultSenha = results[0]['senha'];
+      senhaIgual = bcrypt.compareSync(req.body.senha, resultSenha, (err, result) => {
+        if (err) {
+          return
+        }
+        if (result) {
+          console.log('foi')
+          return result;
+        }
+      });
+    }
+    if (req.body.email == resultEmail && senhaIgual) {
+      res.status(200).json({
+        message: "Login de professor validado"
+    });
+    }
+    else {
+      res.status(500).json({
+        message: "Login de professor inválido"
+      });
+    }
+  });
+})
+
 //======== Admin ========
+// valida o login de um admin
+app.post("/admin/login", async (req, res) => {
+  sqlDB.query("SELECT email, senha FROM admin WHERE email=?", [req.body.email], async (err, results) => {
+    if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
+    let resultEmail;
+    let resultSenha;
+    let senhaIgual
+    if (results.length > 0) {
+      resultEmail = results[0]['email'];
+      resultSenha = results[0]['senha'];
+      senhaIgual = bcrypt.compareSync(req.body.senha, resultSenha, (err, result) => {
+        if (err) {
+          return
+        }
+        if (result) {
+          console.log('foi')
+          return result;
+        }
+      });
+    }   
+    if (req.body.email === resultEmail && senhaIgual) {
+      res.status(200).json({
+        message: "Login de Admin validado"
+    });;
+    }
+    else {
+      res.status(500).json({
+        message: "Login de Admin inválido"
+    });;
+    }
+  });
+})
 
 // Middleware de erro genérico
 app.use((err, req, res, next) => {

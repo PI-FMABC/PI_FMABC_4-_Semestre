@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,56 +15,86 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   // Função aproveitada do código antigo + popup verde
-  void _fazerLogin(BuildContext context) {
+  Future<void> _fazerLogin(BuildContext context) async {
     final email = _emailController.text.trim();
     final senha = _passwordController.text.trim();
-
-    if (email == 'prof@gmail.com' && senha == 'prof123') {
-      // Mostra popup verde de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.green[600],
-          content: const Text(
-            'Login bem-sucedido!',
-            style: TextStyle(fontSize: 16),
+    
+    try {
+      // Verifica se é professor
+      final responseProf = await http.post(
+        Uri.parse('http://localhost:3000/professores/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'senha': senha,
+        }),
+      );
+      // Login Válido 
+      if (responseProf.statusCode == 200) {
+        // Mostra popup verde de sucesso
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green[600],
+            content: const Text(
+              'Login bem-sucedido!',
+              style: TextStyle(fontSize: 16),
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
           ),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
 
-      // Redireciona após 1 segundo
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushReplacementNamed(context, '/prof');
-      });
-    }     // Verifica se é administrador
-    else if (email == 'adm' && senha == '123') {
-      // Mostra popup verde de sucesso para admin
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.green[600],
-          content: const Text(
-            'Login de administrador bem-sucedido!',
-            style: TextStyle(fontSize: 16),
-          ),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        // Redireciona após 1 segundo
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pushReplacementNamed(context, '/prof');
+        });
+      }
+      // Login inválido
+      else {
+        // Verifica se é admin
+        final responseAdmin = await http.post(
+          Uri.parse('http://localhost:3000/admin/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'email': email,
+            'senha': senha,
+          }),
+        );
+        // Login válido
+        if (responseAdmin.statusCode == 200) {
+          // Mostra popup verde de sucesso para admin
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green[600],
+              content: const Text(
+                'Login de administrador bem-sucedido!',
+                style: TextStyle(fontSize: 16),
+              ),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
 
-      // Redireciona para tela do admin após 1 segundo
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushReplacementNamed(context, '/adm');
-      });
-    } else {
-      // Falha de login
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.red,
-          content: Text('Email ou senha incorretos.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+          // Redireciona para tela do admin após 1 segundo
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.pushReplacementNamed(context, '/adm');
+          });
+        }
+        // Login inválido
+        else {
+          // Não é nem professor, nem admin
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Email ou senha incorretos.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+
+    } catch (e) {
+      debugPrint("Erro ao validar o login do usuário");
     }
   }
 

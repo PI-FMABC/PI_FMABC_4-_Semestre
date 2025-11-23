@@ -34,8 +34,8 @@ bool is_tile_empty(const std::vector<uint32_t> &buffer, double limit = .8, int w
 int main() {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    std::string file = "001.mrxs";
-    const char* filename = "C:/Users/leona/Pictures/001.mrxs";
+    std::string file = "002.mrxs";
+    const char* filename = "C:/Users/leona/Pictures/002.mrxs";
     
     openslide_t* slide = openslide_open(filename);
     if (slide == nullptr) {
@@ -148,11 +148,11 @@ int main() {
                     fs::path out_dir = out_root/ file_dir / level_dir;
                     fs::create_directories(out_dir);
                     fs::path out_file_LQ = out_root/ file_dir / level_dir / fmt::format("{}_{}_LQ.jpg", x, y);
-                    fs::path out_file_HQ = out_root/ file_dir / level_dir / fmt::format("{}_{}_HQ.png", x, y);
+                    fs::path out_file_HQ = out_root/ file_dir / level_dir / fmt::format("{}_{}_HQ.jpg", x, y);
                     
                     // Salva o arquivo da imagem
                     cv::imwrite(out_file_LQ.string(), out_bgr, {cv::IMWRITE_JPEG_QUALITY, 5});
-                    cv::imwrite(out_file_HQ.string(), out_bgr, {cv::IMWRITE_PNG_COMPRESSION, 9});
+                    cv::imwrite(out_file_HQ.string(), out_bgr, {cv::IMWRITE_JPEG_QUALITY, 100});
                 } else {
                     std::cout << "Nível " << current_level << ": " << "tile " << x << "_" << y << " --> invalido\n"; // Para debug
                 }
