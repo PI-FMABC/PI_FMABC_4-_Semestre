@@ -10,7 +10,7 @@ class AdmScreen extends StatefulWidget {
 }
 
 class _AdmScreenState extends State<AdmScreen> {
-  // Dados de exemplo para professores
+
   List<Map<String, dynamic>> professores = [];
 
   Future<void> fetchProfessores() async {

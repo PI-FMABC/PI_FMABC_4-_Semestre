@@ -107,6 +107,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         TextEditingController(text: folder != null ? folder['titulo'] : '');
     final _descricaoController =
         TextEditingController(text: folder != null ? folder['descricao'] : '');
+
     List<String> selectedImgs = folder != null && folder['listIMG'] != null
         ? (folder['listIMG'] as List)
             .map<String>((img) => img['_id'] ?? img.toString())
@@ -119,89 +120,141 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
       context: context,
       builder: (_) => StatefulBuilder(builder: (context, setDialogState) {
         return AlertDialog(
-          title: Text(folder == null ? "Adicionar Tópico" : "Editar Tópico"),
+          backgroundColor: const Color(0xFFF2EDF7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                folder == null ? "Adicionar Tópico" : "Editar Tópico",
+                style: const TextStyle(
+                  color: Color(0xFF003b64),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.close, size: 26),
+              )
+            ],
+          ),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _tituloController,
-                  decoration: const InputDecoration(labelText: "Título"),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _descricaoController,
-                  decoration: const InputDecoration(labelText: "Descrição"),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: selectedImgs.isNotEmpty ? selectedImgs.first : null,
-                  items: images
-                      .map((img) => DropdownMenuItem<String>(
-                            value: img['_id'],
-                            child: Text(img['nomeImagem'] ?? 'Sem nome'),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() {
-                        if (!selectedImgs.contains(value))
-                          selectedImgs.add(value);
-                      });
-                    }
-                  },
-                  decoration: const InputDecoration(
-                      labelText: "Selecionar imagens (click para adicionar)"),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 6,
-                  children: selectedImgs.map((imgId) {
-                    final imgName = images.firstWhere((i) => i['_id'] == imgId,
-                            orElse: () =>
-                                {'nomeImagem': 'Desconhecido'})['nomeImagem'] ??
-                        'Desconhecido';
-                    final isMarked = markedForRemoval.contains(imgId);
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 650),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                
+                  _buildStyledField(
+                    controller: _tituloController,
+                    label: "Título",
+                  ),
 
-                    return GestureDetector(
-                      onTap: () {
-                        setDialogState(() {
-                          if (isMarked) {
-                            markedForRemoval.remove(imgId);
-                          } else {
-                            markedForRemoval.add(imgId);
-                          }
-                        });
-                      },
-                      child: Chip(
-                        label: Text(imgName),
-                        backgroundColor: isMarked ? Colors.red[100] : null,
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: isMarked ? Colors.red : Colors.transparent,
-                            width: 2,
+                  const SizedBox(height: 12),
+
+          
+                  _buildStyledField(
+                    controller: _descricaoController,
+                    label: "Descrição",
+                    maxLines: 4,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                
+                  _buildStyledDropdown(
+                    label: "Selecionar imagens",
+                    value: null,
+                    items: images.map((img) {
+                      return DropdownMenuItem<String>(
+                        value: img['_id'],
+                        child: Text(img['nomeImagem'] ?? 'Sem nome'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null && !selectedImgs.contains(value)) {
+                        setDialogState(() => selectedImgs.add(value));
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 10),
+
+               
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: selectedImgs.map((imgId) {
+                      final imgName = images.firstWhere(
+                              (img) => img['_id'] == imgId,
+                              orElse: () => {
+                                    'nomeImagem': 'Desconhecido'
+                                  })['nomeImagem'] ??
+                          'Desconhecido';
+
+                      final isMarked = markedForRemoval.contains(imgId);
+
+                      return GestureDetector(
+                        onTap: () {
+                          setDialogState(() {
+                            if (isMarked) {
+                              markedForRemoval.remove(imgId);
+                            } else {
+                              markedForRemoval.add(imgId);
+                            }
+                          });
+                        },
+                        child: Chip(
+                          label: Text(imgName),
+                          backgroundColor: isMarked ? Colors.red[100] : null,
+                          shape: StadiumBorder(
+                            side: BorderSide(
+                              color: isMarked ? Colors.red : Colors.transparent,
+                              width: 2,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF003b64),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF009245),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () async {
                 final titulo = _tituloController.text.trim();
                 final descricao = _descricaoController.text.trim();
                 if (titulo.isEmpty || descricao.isEmpty) return;
 
                 final finalImgs = selectedImgs
-                    .where((imgId) => !markedForRemoval.contains(imgId))
+                    .where((id) => !markedForRemoval.contains(id))
                     .toList();
 
                 await addOrEditFolder(
@@ -210,6 +263,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                   descricao: descricao,
                   imgs: finalImgs,
                 );
+
                 await fetchFolders();
                 Navigator.pop(context);
               },
@@ -221,11 +275,65 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     );
   }
 
+
+  Widget _buildStyledField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        labelStyle: const TextStyle(color: Color(0xFF003b64)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64), width: 2),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildStyledDropdown({
+    required String label,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required void Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: items,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        labelStyle: const TextStyle(color: Color(0xFF003b64)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64), width: 2),
+        ),
+      ),
+    );
+  }
+
   void _navigateToRoute(BuildContext context, String routeName) {
     debugPrint('=== TENTANDO NAVEGAR ===');
     debugPrint('Rota atual: ${ModalRoute.of(context)?.settings.name}');
     debugPrint('Rota destino: $routeName');
-    
+
     if (ModalRoute.of(context)?.settings.name != routeName) {
       debugPrint('✅ Navegando para: $routeName');
       Navigator.pushNamed(context, routeName);
@@ -238,10 +346,8 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      
-      /// ===========================
-      /// NAVBAR SUPERIOR - RESPONSIVA
-      /// ===========================
+
+   
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -250,11 +356,13 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: Responsive.isMobile(context) ? 12 : 20),
+                padding: EdgeInsets.only(
+                    left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
-                    if (Responsive.isMobile(context) || Responsive.isTablet(context))
+                 
+                    if (Responsive.isMobile(context) ||
+                        Responsive.isTablet(context))
                       Builder(
                         builder: (context) => IconButton(
                           icon: const Icon(Icons.menu, color: Colors.white),
@@ -287,18 +395,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                   ],
                 ),
               ),
-              
-              // BOTÃO SAIR APENAS NO DESKTOP (MOBILE FICA NO DRAWER)
+
+             
               if (Responsive.isDesktop(context))
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
-                        context, 
-                        '/', 
-                        (route) => false
-                      );
+                          context, '/', (route) => false);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: Colors.green[600],
@@ -326,18 +431,16 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
-      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
-          ? _buildDrawer(context) 
+ 
+      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
+          ? _buildDrawer(context)
           : null,
 
       body: Padding(
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
           children: [
-            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+         
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -345,7 +448,8 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                     color: const Color(0xFFe5e5e5),
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -353,7 +457,8 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                           onTap: () => _navigateToRoute(context, '/prof')),
                       _buildMenuButton(context, "Tópicos", isActive: true),
                       _buildMenuButton(context, "Galeria",
-                          onTap: () => _navigateToRoute(context, '/gallery_prof')),
+                          onTap: () =>
+                              _navigateToRoute(context, '/gallery_prof')),
                     ],
                   ),
                 ),
@@ -381,7 +486,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             Expanded(
               child: folders.isEmpty
                   ? const Center(
@@ -392,9 +497,11 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                   : GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
-                        crossAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        crossAxisSpacing:
+                            Responsive.isMobile(context) ? 12 : 16,
                         mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
-                        childAspectRatio: Responsive.isMobile(context) ? 0.8 : 0.9,
+                        childAspectRatio:
+                            Responsive.isMobile(context) ? 0.8 : 0.9,
                       ),
                       itemCount: folders.length,
                       itemBuilder: (context, index) {
@@ -426,7 +533,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                         titulo,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: Responsive.isMobile(context) ? 14 : 16,
+                                          fontSize: Responsive.isMobile(context)
+                                              ? 14
+                                              : 16,
                                           color: const Color(0xFF003b64),
                                         ),
                                       ),
@@ -435,7 +544,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                         descricao,
                                         style: TextStyle(
                                           color: Colors.black87,
-                                          fontSize: Responsive.isMobile(context) ? 12 : 14,
+                                          fontSize: Responsive.isMobile(context)
+                                              ? 12
+                                              : 14,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -443,7 +554,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                       const SizedBox(height: 10),
                                       if (listIMG.isNotEmpty)
                                         SizedBox(
-                                          height: Responsive.isMobile(context) ? 80 : 100,
+                                          height: Responsive.isMobile(context)
+                                              ? 80
+                                              : 100,
                                           child: ListView(
                                             scrollDirection: Axis.horizontal,
                                             children:
@@ -471,7 +584,10 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                                     );
                                                   },
                                                   child: Container(
-                                                    width: Responsive.isMobile(context) ? 70 : 80,
+                                                    width: Responsive.isMobile(
+                                                            context)
+                                                        ? 70
+                                                        : 80,
                                                     decoration: BoxDecoration(
                                                       border: Border.all(
                                                           color: Colors.black,
@@ -539,7 +655,9 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                       IconButton(
                                         icon: Icon(Icons.edit,
                                             color: const Color(0xFF003b64),
-                                            size: Responsive.isMobile(context) ? 18 : 24),
+                                            size: Responsive.isMobile(context)
+                                                ? 18
+                                                : 24),
                                         tooltip: "Editar Tópico",
                                         onPressed: () => _showFolderDialog(
                                             context,
@@ -548,14 +666,17 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                       IconButton(
                                         icon: Icon(Icons.delete,
                                             color: Colors.redAccent,
-                                            size: Responsive.isMobile(context) ? 18 : 24),
+                                            size: Responsive.isMobile(context)
+                                                ? 18
+                                                : 24),
                                         tooltip: "Excluir pasta",
                                         onPressed: () async {
                                           final confirm =
                                               await showDialog<bool>(
                                             context: context,
                                             builder: (_) => AlertDialog(
-                                              title: const Text("Excluir pasta"),
+                                              title:
+                                                  const Text("Excluir pasta"),
                                               content: Text(
                                                   "Tem certeza que deseja excluir '$titulo'?"),
                                               actions: [
@@ -600,7 +721,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
+ 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(

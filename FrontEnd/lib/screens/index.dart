@@ -15,9 +15,7 @@ class IndexScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR
-      /// ===========================
+ 
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -83,16 +81,12 @@ class IndexScreen extends StatelessWidget {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+   
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
           ? _buildDrawer(context) 
           : null,
 
-      /// ===========================
-      /// CORPO PRINCIPAL
-      /// ===========================
+    
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -101,7 +95,7 @@ class IndexScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+      
               if (Responsive.isDesktop(context))
                 Center(
                   child: Container(
@@ -128,14 +122,14 @@ class IndexScreen extends StatelessWidget {
 
               if (Responsive.isDesktop(context)) const SizedBox(height: 28),
 
-              /// ===== ÁREA DE CONTEÚDO =====
+           
               Responsive.isMobile(context)
                   ? _buildMobileLayout(context)
                   : _buildDesktopLayout(context),
 
               const SizedBox(height: 36),
 
-              /// ===== RODAPÉ =====
+           
               Center(
                 child: Text(
                   "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
@@ -152,11 +146,11 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== LAYOUT PARA MOBILE =====
+ 
   Widget _buildMobileLayout(BuildContext context) {
     return Column(
       children: [
-        /// SIDEBAR NO TOPO (MOBILE)
+  
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -192,7 +186,7 @@ class IndexScreen extends StatelessWidget {
           ),
         ),
 
-        /// GRID DE IMAGENS (MOBILE)
+ 
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -211,12 +205,12 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== LAYOUT PARA DESKTOP/TABLET =====
+ 
   Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// ==== SIDEBAR ====
+    
         Container(
           width: Responsive.isTablet(context) ? 180 : 200,
           padding: const EdgeInsets.all(16),
@@ -258,7 +252,7 @@ class IndexScreen extends StatelessWidget {
 
         SizedBox(width: Responsive.isTablet(context) ? 16 : 20),
 
-        /// ==== GRID DE IMAGENS ====
+   
         Expanded(
           child: GridView.builder(
             shrinkWrap: true,
@@ -279,7 +273,7 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== ITEM DE IMAGEM REUTILIZÁVEL =====
+
   Widget _buildImageItem(BuildContext context, int index) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/image-viewer'),
@@ -320,7 +314,7 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== CHIP PARA ÍNDICE (MOBILE) =====
+
   Widget _buildIndexChip(String label) {
     return Chip(
       label: Text(label),
@@ -329,7 +323,7 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
+ 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -407,7 +401,7 @@ class IndexScreen extends StatelessWidget {
     );
   }
 
-  /// ===== BOTÃO DE MENU =====
+
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(

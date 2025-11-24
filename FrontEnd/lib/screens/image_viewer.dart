@@ -19,9 +19,7 @@ class ImageViewerScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR
-      /// ===========================
+   
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -68,7 +66,6 @@ class ImageViewerScreen extends StatelessWidget {
                 ),
               ),
 
-              // BOTÃO LOGIN (APENAS DESKTOP)
               if (Responsive.isDesktop(context))
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
@@ -90,16 +87,12 @@ class ImageViewerScreen extends StatelessWidget {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+    
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
           ? _buildDrawer(context) 
           : null,
 
-      /// ===========================
-      /// CONTEÚDO PRINCIPAL
-      /// ===========================
+   
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -108,7 +101,7 @@ class ImageViewerScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+             
               if (Responsive.isDesktop(context))
                 Center(
                   child: Container(
@@ -136,14 +129,13 @@ class ImageViewerScreen extends StatelessWidget {
 
               if (Responsive.isDesktop(context)) const SizedBox(height: 28),
 
-              /// ===== ÁREA DE CONTEÚDO =====
+           
               Responsive.isMobile(context)
                   ? _buildMobileLayout(context, imageFilename)
                   : _buildDesktopLayout(context, imageFilename),
 
               const SizedBox(height: 36),
 
-              /// ===== RODAPÉ =====
               Center(
                 child: Text(
                   "© ${DateTime.now().year} FMABC — Atlas Digital de Histologia",
@@ -178,7 +170,7 @@ class ImageViewerScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         
-        // IMAGEM PRINCIPAL
+
         Container(
           height: 300,
           decoration: BoxDecoration(
@@ -194,7 +186,7 @@ class ImageViewerScreen extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        // PAINEL DE ANOTAÇÕES (EMBAIXO DA IMAGEM NO MOBILE)
+
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -216,7 +208,7 @@ class ImageViewerScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              /// LISTA DE ANOTAÇÕES
+      
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -286,7 +278,7 @@ class ImageViewerScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// ===== ÁREA PRINCIPAL DA IMAGEM =====
+
         Expanded(
           flex: 3,
           child: Column(
@@ -321,7 +313,7 @@ class ImageViewerScreen extends StatelessWidget {
 
         SizedBox(width: Responsive.isTablet(context) ? 16 : 24),
 
-        /// ===== PAINEL LATERAL =====
+
         Container(
           width: Responsive.isTablet(context) ? 220 : 280,
           padding: const EdgeInsets.all(16),
@@ -343,7 +335,7 @@ class ImageViewerScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              /// LISTA DE ANOTAÇÕES
+
               ListView.builder(
                 shrinkWrap: true,
                 itemCount: 3,
@@ -407,7 +399,7 @@ class ImageViewerScreen extends StatelessWidget {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
+
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -485,7 +477,7 @@ class ImageViewerScreen extends StatelessWidget {
     );
   }
 
-  /// ===== BOTÃO DE MENU =====
+
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(

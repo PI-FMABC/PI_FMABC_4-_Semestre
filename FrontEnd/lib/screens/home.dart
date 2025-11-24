@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          folders = data.reversed.take(3).toList(); // pega só os 3 primeiros
+          folders = data.reversed.take(3).toList(); 
         });
       } else {
         throw Exception('Erro ao carregar pastas: ${response.statusCode}');
@@ -47,9 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR
-      /// ===========================
+    
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -117,22 +115,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+   
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
 
-      /// ===========================
-      /// CONTEÚDO PRINCIPAL
-      /// ===========================
+    
       body: SingleChildScrollView(
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ===== MENU SUPERIOR DESKTOP =====
+          
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -158,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             if (Responsive.isDesktop(context)) const SizedBox(height: 28),
 
-            /// ===== SEÇÃO INTRO =====
+         
             Text(
               "Bem-vindo ao Atlas Digital de Histologia",
               style: TextStyle(
@@ -174,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
 
-            /// ===== PASTAS MAIS USADAS =====
+          
             const Text(
               "Pastas mais usadas",
               style: TextStyle(
@@ -340,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// ===== DRAWER =====
+
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(

@@ -6,13 +6,13 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
-const { getPreviewImagePath } = require("./previewHelper"); // Função que retorna caminho do preview
+const { getPreviewImagePath } = require("./previewHelper"); 
 
-// rotas:
+
 const Diretorio = require("./diretorioSchema");
 const InfoImagem = require("./infoImagemSchema");
 
-// Variável do SQL
+
 const sqlDB = sql.createConnection({
   host: process.env.HOST,
   port: process.env.SQL_PORT,
@@ -25,12 +25,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Servir a pasta Tiles para previews
+
 app.use("/tiles", express.static(path.join(__dirname, "../Tiles")));
 
 const PORT = process.env.PORT || 3000;
 
-// Conexão com o MongoDB e SQL e inicializa servidor somente após conectar
+
 async function start() {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -58,9 +58,7 @@ app.get("/test", (req, res) => {
   });
 });
 
-/// ======================= ROTAS DE DIRETÓRIO =======================
 
-// Criar diretório
 app.post("/diretorio", async (req, res) => {
   try {
     const { titulo, descricao, listIMG = [] } = req.body;
@@ -80,7 +78,7 @@ app.post("/diretorio", async (req, res) => {
   }
 });
 
-// Listar diretórios com preview das imagens
+
 app.get("/diretorio", async (req, res) => {
   try {
     const dirs = await Diretorio.find().populate("listIMG");
@@ -103,7 +101,7 @@ app.get("/diretorio", async (req, res) => {
   }
 });
 
-// Buscar diretório pelo ID
+
 app.get("/diretorio/:id", async (req, res) => {
   try {
     const dir = await Diretorio.findById(req.params.id).populate("listIMG");
@@ -129,14 +127,14 @@ app.get("/diretorio/:id", async (req, res) => {
   }
 });
 
-// Atualizar diretório
+
 app.put("/diretorio/:id", async (req, res) => {
   try {
     const { titulo, descricao, listIMG = [] } = req.body;
     const dir = await Diretorio.findById(req.params.id);
     if (!dir) return res.status(404).json({ erro: "Diretório não encontrado" });
 
-    // Remove vínculo antigo
+
     await InfoImagem.updateMany(
       { _id: { $in: dir.listIMG } },
       { $pull: { diretorios: dir._id } }
@@ -147,7 +145,7 @@ app.put("/diretorio/:id", async (req, res) => {
     dir.listIMG = listIMG;
     await dir.save();
 
-    // Adiciona vínculo novo
+
     if (listIMG.length > 0) {
       await InfoImagem.updateMany(
         { _id: { $in: listIMG } },
@@ -161,7 +159,8 @@ app.put("/diretorio/:id", async (req, res) => {
   }
 });
 
-// Deletar diretório
+
+
 app.delete("/diretorio/:id", async (req, res) => {
   try {
     const dir = await Diretorio.findByIdAndDelete(req.params.id);
@@ -178,9 +177,9 @@ app.delete("/diretorio/:id", async (req, res) => {
   }
 });
 
-/// ======================= ROTAS DE INFOIMAGEM =======================
 
-// Criar imagem
+
+
 app.post("/infoimagem", async (req, res) => {
   try {
     const { nomeNaPasta, nomeImagem, descricao, diretorios = [] } = req.body;
@@ -205,7 +204,7 @@ app.post("/infoimagem", async (req, res) => {
   }
 });
 
-// Listar todas as imagens
+
 app.get("/infoimagem", async (req, res) => {
   try {
     const imgs = await InfoImagem.find().populate("diretorios");
@@ -225,7 +224,7 @@ app.get("/infoimagem", async (req, res) => {
   }
 });
 
-// Buscar imagem por ID
+
 app.get("/infoimagem/:id", async (req, res) => {
   try {
     const img = await InfoImagem.findById(req.params.id).populate("diretorios");
@@ -248,14 +247,14 @@ app.get("/infoimagem/:id", async (req, res) => {
   }
 });
 
-// Atualizar imagem
+
 app.put("/infoimagem/:id", async (req, res) => {
   try {
     const { nomeNaPasta, nomeImagem, descricao, diretorios = [] } = req.body;
     const img = await InfoImagem.findById(req.params.id);
     if (!img) return res.status(404).json({ erro: "Imagem não encontrada" });
 
-    // Remove vínculo antigo
+    
     await Diretorio.updateMany(
       { _id: { $in: img.diretorios } },
       { $pull: { listIMG: img._id } }
@@ -267,7 +266,7 @@ app.put("/infoimagem/:id", async (req, res) => {
     img.diretorios = diretorios;
     await img.save();
 
-    // Adiciona vínculo novo
+
     if (diretorios.length > 0) {
       await Diretorio.updateMany(
         { _id: { $in: diretorios } },
@@ -281,7 +280,7 @@ app.put("/infoimagem/:id", async (req, res) => {
   }
 });
 
-// Deletar imagem
+
 app.delete("/infoimagem/:id", async (req, res) => {
   try {
     const img = await InfoImagem.findByIdAndDelete(req.params.id);
@@ -298,9 +297,8 @@ app.delete("/infoimagem/:id", async (req, res) => {
   }
 });
 
-// Parte de admin e professores
-//======== Professor ==========
-// busca todos os professores
+
+
 app.get("/professores", async (req, res) => {
   sqlDB.query("SELECT * FROM professores", (err, results) => {
     if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
@@ -308,7 +306,7 @@ app.get("/professores", async (req, res) => {
   });
 });
 
-// remove um professor por email
+
 app.delete("/professores/:email", async (req, res) => {
   sqlDB.query("DELETE FROM professores WHERE email = ?", [req.params.email], (err) => {
     if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
@@ -318,7 +316,7 @@ app.delete("/professores/:email", async (req, res) => {
   });
 });
 
-// Adiciona um professor
+
 app.post("/professores", async (req, res) => {
   const hash_senha = await bcrypt.hash(req.body.senha, 12);
   sqlDB.query("INSERT INTO professores (email, senha, nome) VALUES (?, ?, ?)", [req.body.email, hash_senha, req.body.nome], (err) => {
@@ -329,7 +327,7 @@ app.post("/professores", async (req, res) => {
   });
 });
 
-// edita um professor por email
+
 app.put("/professores", async (req, res) => {
   const hash_senha = await bcrypt.hash(req.body.senha, 12);
   sqlDB.query("UPDATE professores SET email=?, senha=?, nome=? WHERE email=?", [req.body.email, hash_senha, req.body.nome, req.body.oldEmail], (err) => {
@@ -340,7 +338,7 @@ app.put("/professores", async (req, res) => {
   });
 });
 
-// valida o login de um professor
+
 app.post("/professores/login", async (req, res) => {
   sqlDB.query("SELECT email, senha FROM professores WHERE email=?", [req.body.email], async (err, results) => {
     if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
@@ -372,8 +370,8 @@ app.post("/professores/login", async (req, res) => {
   });
 })
 
-//======== Admin ========
-// valida o login de um admin
+
+
 app.post("/admin/login", async (req, res) => {
   sqlDB.query("SELECT email, senha FROM admin WHERE email=?", [req.body.email], async (err, results) => {
     if (err) return res.status(err.status || 500).json({erro: err.message || "Erro interno"});
@@ -405,7 +403,7 @@ app.post("/admin/login", async (req, res) => {
   });
 })
 
-// Middleware de erro genérico
+
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(err.status || 500).json({ erro: err.message || "Erro interno" });

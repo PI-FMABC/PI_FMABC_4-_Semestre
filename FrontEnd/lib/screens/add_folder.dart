@@ -8,7 +8,7 @@ class AddFolderScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
 
-      /// ---------------------- APPBAR ----------------------
+    
       appBar: AppBar(
         backgroundColor: const Color(0xFF003b64),
         title: const Text(
@@ -37,13 +37,13 @@ class AddFolderScreen extends StatelessWidget {
         ],
       ),
 
-      /// ---------------------- BODY ----------------------
+      
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Título
+          
             const Text(
               "Adicionar Novo Diretório",
               style: TextStyle(
@@ -54,7 +54,7 @@ class AddFolderScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            /// Campo de título do diretório
+          
             Center(
               child: SizedBox(
                 width: 450,
@@ -84,11 +84,11 @@ class AddFolderScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// Layout principal: imagens + descrição
+          
             Expanded(
               child: Row(
                 children: [
-                  /// Grid de imagens
+              
                   Expanded(
                     flex: 2,
                     child: GridView.builder(
@@ -123,7 +123,7 @@ class AddFolderScreen extends StatelessWidget {
                                         color: Colors.redAccent),
                                     tooltip: "Remover imagem",
                                     onPressed: () {
-                                      // Função futura: remover imagem
+                                    
                                     },
                                   ),
                                 ),
@@ -136,7 +136,7 @@ class AddFolderScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 24),
 
-                  /// Descrição e botão Criar
+               
                   Expanded(
                     flex: 1,
                     child: Column(
@@ -183,7 +183,7 @@ class AddFolderScreen extends StatelessWidget {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              // Lógica de criação de diretório futura
+                         
                             },
                             icon: const Icon(Icons.check),
                             label: const Text("Criar Diretório"),

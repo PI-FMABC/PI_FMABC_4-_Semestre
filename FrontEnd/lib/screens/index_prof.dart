@@ -14,9 +14,7 @@ class IndexProfScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR
-      /// ===========================
+  
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
@@ -80,9 +78,6 @@ class IndexProfScreen extends StatelessWidget {
         ),
       ),
 
-      /// ===========================
-      /// CORPO PRINCIPAL
-      /// ===========================
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -114,11 +109,10 @@ class IndexProfScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              /// ===== ÁREA DE CONTEÚDO =====
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// ==== SIDEBAR ====
+     
                   Container(
                     width: 200,
                     padding: const EdgeInsets.all(16),
@@ -160,7 +154,7 @@ class IndexProfScreen extends StatelessWidget {
 
                   const SizedBox(width: 20),
 
-                  /// ==== GRID DE IMAGENS ====
+           
                   Expanded(
                     child: GridView.builder(
                       shrinkWrap: true,
@@ -222,7 +216,7 @@ class IndexProfScreen extends StatelessWidget {
 
               const SizedBox(height: 36),
 
-              /// ===== RODAPÉ =====
+      
               Center(
                 child: Text(
                   "© ${DateTime.now().year} FMABC — Atlas Digital de Citologia",
@@ -238,7 +232,7 @@ class IndexProfScreen extends StatelessWidget {
     );
   }
 
-  /// ===== BOTÃO DE MENU (PADRÃO NAVBAR INTERNA) =====
+ 
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(

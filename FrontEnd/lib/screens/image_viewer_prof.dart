@@ -12,7 +12,7 @@ class ImageViewerProfScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// NAVBAR FMABC (sem seta de voltar)
+ 
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
@@ -73,12 +73,11 @@ class ImageViewerProfScreen extends StatelessWidget {
         ),
       ),
 
-      /// CONTEÚDO PRINCIPAL
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
         child: Column(
           children: [
-            // Menu topo (Home / Diretórios / Galeria) - "Galeria" ou "Índice" pode ser ativo conforme contexto
+           
             Center(
               child: Container(
                 decoration: BoxDecoration(
@@ -107,11 +106,11 @@ class ImageViewerProfScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Área principal: imagem grande + painel lateral com edição
+          
             Expanded(
               child: Row(
                 children: [
-                  // Área da imagem (maior)
+                 
                   Expanded(
                     flex: 3,
                     child: Container(
@@ -124,7 +123,7 @@ class ImageViewerProfScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // título da imagem e ações rápidas
+                   
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -142,7 +141,7 @@ class ImageViewerProfScreen extends StatelessWidget {
                                   children: [
                                     IconButton(
                                       onPressed: () {
-                                        // futura função: adicionar pin interativo
+                                   
                                       },
                                       icon: const Icon(Icons.push_pin_outlined,
                                           color: Color(0xFF003b64)),
@@ -150,7 +149,7 @@ class ImageViewerProfScreen extends StatelessWidget {
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        // futura função: rotacionar ou espelhar
+                                    
                                       },
                                       icon: const Icon(Icons.rotate_right,
                                           color: Color(0xFF003b64)),
@@ -162,7 +161,7 @@ class ImageViewerProfScreen extends StatelessWidget {
                             ),
                           ),
 
-                          // área da imagem (mock)
+                      
                           Expanded(
                             child: Center(
                               child: ClipRRect(
@@ -200,7 +199,7 @@ class ImageViewerProfScreen extends StatelessWidget {
 
                   const SizedBox(width: 20),
 
-                  // Painel lateral de edição (professor)
+               
                   Container(
                     width: 320,
                     decoration: BoxDecoration(
@@ -221,10 +220,10 @@ class ImageViewerProfScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // Import / upload (visual)
+                 
                         ElevatedButton.icon(
                           onPressed: () {
-                            // futura função: importar imagem
+                         
                           },
                           icon: const Icon(Icons.upload_file),
                           label: const Text("Importar imagem"),
@@ -237,7 +236,7 @@ class ImageViewerProfScreen extends StatelessWidget {
 
                         const SizedBox(height: 12),
 
-                        // Título editável (visual)
+                  
                         const Text("Título:"),
                         const SizedBox(height: 6),
                         TextField(
@@ -254,7 +253,7 @@ class ImageViewerProfScreen extends StatelessWidget {
 
                         const SizedBox(height: 10),
 
-                        // Selecionar diretório (visual)
+                
                         const Text("Selecionar diretório:"),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
@@ -296,13 +295,13 @@ class ImageViewerProfScreen extends StatelessWidget {
 
                         const Spacer(),
 
-                        // Ações: salvar e excluir
+              
                         Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // futura ação: salvar metadata
+                              
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor: Colors.green[600],
@@ -323,7 +322,7 @@ class ImageViewerProfScreen extends StatelessWidget {
                             Expanded(
                               child: OutlinedButton(
                                 onPressed: () {
-                                  // futura ação: excluir imagem
+                              
                                   showDialog(
                                     context: context,
                                     builder: (ctx) => AlertDialog(

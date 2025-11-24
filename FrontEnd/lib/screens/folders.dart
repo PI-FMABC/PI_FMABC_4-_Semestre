@@ -64,9 +64,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR - RESPONSIVA
-      /// ===========================
+   
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -79,7 +77,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
                     left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
+                    
                     if (Responsive.isMobile(context) ||
                         Responsive.isTablet(context))
                       Builder(
@@ -135,9 +133,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+     
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
@@ -146,7 +142,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
           children: [
-            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+           
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -318,7 +314,6 @@ class _FoldersScreenState extends State<FoldersScreen> {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(

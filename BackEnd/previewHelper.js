@@ -1,9 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 
-// Função que retorna o caminho da imagem preview
+
 function getPreviewImagePath(nomeNaPasta) {
-  const tilesDir = path.join(__dirname, "../tiles"); // caminho da pasta Tiles
+  const tilesDir = path.join(__dirname, "../Tiles"); 
   const pasta = path.join(tilesDir, nomeNaPasta);
   if (!fs.existsSync(pasta)) {
     throw new Error(`Pasta '${nomeNaPasta}' não encontrada em Tiles`);
@@ -23,9 +23,10 @@ function getPreviewImagePath(nomeNaPasta) {
     return currNum > prevNum ? curr : prev;
   });
 
-  // Caminho relativo para o frontend acessar via /tiles
+  
   const relativePath = `${nomeNaPasta}/${maxLevel}/0_0_HQ.jpg`;
-  return relativePath; // NÃO retorna caminho absoluto
+
+  return relativePath; 
 }
 
 module.exports = { getPreviewImagePath };
