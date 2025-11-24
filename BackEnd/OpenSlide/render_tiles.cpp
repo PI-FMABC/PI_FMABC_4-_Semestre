@@ -31,11 +31,11 @@ bool is_tile_empty(const std::vector<uint32_t> &buffer, double limit = .8, int w
     return frac_white >= limit;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    std::string file = "001.mrxs";
-    const char* filename = "C:/Users/leona/Pictures/001.mrxs";
+    std::string file = argv[1];
+    const char* filename = fmt::format("C:/Users/leona/Pictures/{}", arg[1]);
     
     openslide_t* slide = openslide_open(filename);
     if (slide == nullptr) {

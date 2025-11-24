@@ -1,8 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:path/path.dart' as path;
 import 'visualizacao_imagens.dart';
 
 class ImageViewerProfScreen extends StatelessWidget {
   const ImageViewerProfScreen({super.key});
+  
+  String getExecutablePath(String executableFilename) {
+    String mainPath = Platform.resolvedExecutable;
+    mainPath = path.dirname(mainPath);
+    String exePath = path.join(mainPath, 'lib', 'assets', executableFilename);
+    return exePath;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,8 +232,21 @@ class ImageViewerProfScreen extends StatelessWidget {
 
                  
                         ElevatedButton.icon(
-                          onPressed: () {
-                         
+                          onPressed: () async {
+                            String exePath = getExecutablePath('render.exe');
+
+                            try {
+                              ProcessResult result = await Process.run(exePath, [imageFilename]);
+
+                              if (result.exitCode == 0) {
+                                print('Programa render executou corretamente!');
+                              }
+                              else {
+                                print('Programa render não conseguiu ser executado...');
+                              }
+                            } catch (e) {
+                              print('Erro ao executar o programa: $e');
+                            }
                           },
                           icon: const Icon(Icons.upload_file),
                           label: const Text("Importar imagem"),
