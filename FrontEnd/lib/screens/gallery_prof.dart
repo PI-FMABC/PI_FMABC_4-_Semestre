@@ -112,6 +112,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
         TextEditingController(text: img?['nomeImagem'] ?? '');
     final _descricaoController =
         TextEditingController(text: img?['descricao'] ?? '');
+
     List<String> selectedFolders = img?['diretorios'] != null
         ? (img!['diretorios'] as List)
             .map<String>((f) => f is Map ? f['_id'] as String : f.toString())
@@ -122,72 +123,135 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
       context: context,
       builder: (_) => StatefulBuilder(builder: (context, setDialogState) {
         return AlertDialog(
-          title: Text(img == null ? "Adicionar Imagem" : "Editar Imagem"),
+          backgroundColor: const Color(0xFFF2EDF7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                img == null ? "Adicionar Imagem" : "Editar Imagem",
+                style: const TextStyle(
+                  color: Color(0xFF003b64),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.close, size: 26),
+              )
+            ],
+          ),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _nomeNaPastaController,
-                  decoration: const InputDecoration(labelText: "Nome da pasta"),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _nomeImagemController,
-                  decoration:
-                      const InputDecoration(labelText: "Nome da imagem"),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _descricaoController,
-                  decoration: const InputDecoration(labelText: "Descrição"),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: null,
-                  decoration:
-                      const InputDecoration(labelText: "Adicionar pasta"),
-                  items: folders.map((folder) {
-                    return DropdownMenuItem<String>(
-                      value: folder['_id'],
-                      child: Text(folder['titulo'] ?? 'Sem título'),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null && !selectedFolders.contains(value)) {
-                      setDialogState(() {
-                        selectedFolders.add(value);
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  children: selectedFolders.map((folderId) {
-                    final folderName = folders.firstWhere(
-                            (f) => f['_id'] == folderId,
-                            orElse: () =>
-                                {'titulo': 'Desconhecido'})['titulo'] ??
-                        'Desconhecido';
-                    return Chip(
-                      label: Text(folderName),
-                      onDeleted: () {
-                        setDialogState(() {
-                          selectedFolders.remove(folderId);
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 650),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /// LINHA: Nome da pasta + Adicionar pasta
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _buildStyledField(
+                          controller: _nomeNaPastaController,
+                          label: "Nome da pasta",
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: _buildStyledDropdown(
+                          label: "Adicionar pasta",
+                          value: null,
+                          items: folders.map((folder) {
+                            return DropdownMenuItem<String>(
+                              value: folder['_id'],
+                              child: Text(folder['titulo'] ?? 'Sem título'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null &&
+                                !selectedFolders.contains(value)) {
+                              setDialogState(() {
+                                selectedFolders.add(value);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// Nome da imagem
+                  _buildStyledField(
+                    controller: _nomeImagemController,
+                    label: "Nome da imagem",
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// Descrição
+                  _buildStyledField(
+                    controller: _descricaoController,
+                    label: "Descrição",
+                    maxLines: 4,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// LISTA DE PASTAS SELECIONADAS
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: selectedFolders.map((folderId) {
+                      final folderName = folders.firstWhere(
+                        (f) => f['_id'] == folderId,
+                        orElse: () => {'titulo': 'Desconhecido'},
+                      )['titulo'];
+
+                      return Chip(
+                        label: Text(folderName),
+                        onDeleted: () {
+                          setDialogState(() {
+                            selectedFolders.remove(folderId);
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancelar")),
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF003b64),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF009245),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () async {
                 final nomeNaPasta = _nomeNaPastaController.text.trim();
                 final nomeImagem = _nomeImagemController.text.trim();
@@ -214,6 +278,68 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     );
   }
 
+  Widget _buildStyledField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64), width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStyledDropdown({
+    required String label,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF003b64), width: 2),
+        ),
+      ),
+      items: items,
+      onChanged: onChanged,
+    );
+  }
+
   void _navigateToRoute(BuildContext context, String routeName) {
     if (ModalRoute.of(context)?.settings.name != routeName) {
       Navigator.pushNamed(context, routeName);
@@ -224,7 +350,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      
+
       /// ===========================
       /// NAVBAR SUPERIOR - RESPONSIVA
       /// ===========================
@@ -236,11 +362,13 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: Responsive.isMobile(context) ? 12 : 20),
+                padding: EdgeInsets.only(
+                    left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
                     // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
-                    if (Responsive.isMobile(context) || Responsive.isTablet(context))
+                    if (Responsive.isMobile(context) ||
+                        Responsive.isTablet(context))
                       Builder(
                         builder: (context) => IconButton(
                           icon: const Icon(Icons.menu, color: Colors.white),
@@ -273,7 +401,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                   ],
                 ),
               ),
-              
+
               // BOTÃO SAIR APENAS NO DESKTOP (MOBILE FICA NO DRAWER)
               if (Responsive.isDesktop(context))
                 Padding(
@@ -281,10 +409,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
-                        context, 
-                        '/', 
-                        (route) => false
-                      );
+                          context, '/', (route) => false);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: Colors.green[600],
@@ -315,8 +440,8 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
       /// ===========================
       /// DRAWER PARA MOBILE/TABLET
       /// ===========================
-      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context)) 
-          ? _buildDrawer(context) 
+      drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
+          ? _buildDrawer(context)
           : null,
 
       body: Padding(
@@ -331,14 +456,16 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                     color: const Color(0xFFe5e5e5),
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildMenuButton(context, "Home",
                           onTap: () => _navigateToRoute(context, '/prof')),
                       _buildMenuButton(context, "Tópicos",
-                          onTap: () => _navigateToRoute(context, '/folders_prof')),
+                          onTap: () =>
+                              _navigateToRoute(context, '/folders_prof')),
                       _buildMenuButton(context, "Galeria", isActive: true),
                     ],
                   ),
@@ -367,7 +494,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             Expanded(
               child: imagens.isEmpty
                   ? const Center(
@@ -377,14 +504,16 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                     )
                   : GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: Responsive.isMobile(context) 
-                            ? 2 
-                            : Responsive.isTablet(context) 
-                                ? 3 
+                        crossAxisCount: Responsive.isMobile(context)
+                            ? 2
+                            : Responsive.isTablet(context)
+                                ? 3
                                 : 4,
-                        crossAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
+                        crossAxisSpacing:
+                            Responsive.isMobile(context) ? 12 : 16,
                         mainAxisSpacing: Responsive.isMobile(context) ? 12 : 16,
-                        childAspectRatio: Responsive.isMobile(context) ? 0.8 : 0.9,
+                        childAspectRatio:
+                            Responsive.isMobile(context) ? 0.8 : 0.9,
                       ),
                       itemCount: imagens.length,
                       itemBuilder: (context, index) {
@@ -429,9 +558,12 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                               "http://localhost:3000/tiles/$previewPath",
                                               fit: BoxFit.cover,
                                               errorBuilder: (_, __, ___) =>
-                                                   Icon(
+                                                  Icon(
                                                 Icons.broken_image,
-                                                size: Responsive.isMobile(context) ? 40 : 50,
+                                                size:
+                                                    Responsive.isMobile(context)
+                                                        ? 40
+                                                        : 50,
                                                 color: Colors.grey,
                                               ),
                                             )
@@ -445,7 +577,10 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.all(Responsive.isMobile(context) ? 6.0 : 8.0),
+                                    padding: EdgeInsets.all(
+                                        Responsive.isMobile(context)
+                                            ? 6.0
+                                            : 8.0),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -454,7 +589,10 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                           titulo,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: Responsive.isMobile(context) ? 12 : 14,
+                                            fontSize:
+                                                Responsive.isMobile(context)
+                                                    ? 12
+                                                    : 14,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
@@ -463,7 +601,10 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                         Text(
                                           descricao,
                                           style: TextStyle(
-                                            fontSize: Responsive.isMobile(context) ? 10 : 12,
+                                            fontSize:
+                                                Responsive.isMobile(context)
+                                                    ? 10
+                                                    : 12,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -481,7 +622,9 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                     IconButton(
                                       icon: Icon(Icons.edit,
                                           color: const Color(0xFF003b64),
-                                          size: Responsive.isMobile(context) ? 18 : 24),
+                                          size: Responsive.isMobile(context)
+                                              ? 18
+                                              : 24),
                                       tooltip: "Editar imagem",
                                       onPressed: () =>
                                           _showImagemDialog(context, img: img),
@@ -489,7 +632,9 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                     IconButton(
                                       icon: Icon(Icons.delete,
                                           color: Colors.redAccent,
-                                          size: Responsive.isMobile(context) ? 18 : 24),
+                                          size: Responsive.isMobile(context)
+                                              ? 18
+                                              : 24),
                                       tooltip: "Excluir imagem",
                                       onPressed: () async {
                                         final confirm = await showDialog<bool>(
