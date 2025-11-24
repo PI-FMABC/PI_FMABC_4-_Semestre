@@ -7,6 +7,14 @@ const infoImagemSchema = new mongoose.Schema(
     descricao: { type: String, required: true },
 
     diretorios: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diretorio" }],
+    
+    // tamanhoNiveis: {
+    //   type: Map,
+    //   of: new mongoose.Schema({
+    //     width: {type: Number, required: true},
+    //     width: {type: Number, required: true}
+    //   }, {_id: false})
+    // }
   },
   { timestamps: true }
 );

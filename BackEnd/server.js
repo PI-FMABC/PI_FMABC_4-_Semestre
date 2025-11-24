@@ -347,7 +347,6 @@ app.post("/professores/login", async (req, res) => {
     let resultEmail;
     let resultSenha;
     let senhaIgual
-    console.log(results)
     if (results.length > 0) {
       resultEmail = results[0]['email'];
       resultSenha = results[0]['senha'];
@@ -356,7 +355,6 @@ app.post("/professores/login", async (req, res) => {
           return
         }
         if (result) {
-          console.log('foi')
           return result;
         }
       });
@@ -390,7 +388,6 @@ app.post("/admin/login", async (req, res) => {
           return
         }
         if (result) {
-          console.log('foi')
           return result;
         }
       });
@@ -403,7 +400,7 @@ app.post("/admin/login", async (req, res) => {
     else {
       res.status(500).json({
         message: "Login de Admin inválido"
-    });;
+    });
     }
   });
 })

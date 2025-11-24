@@ -242,23 +242,15 @@ class _FoldersScreenState extends State<FoldersScreen> {
                                               const EdgeInsets.only(right: 8),
                                           child: GestureDetector(
                                             onTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (_) => AlertDialog(
-                                                  title: const Text(
-                                                      "Preview clicado"),
-                                                  content: const Text(
-                                                      "Aqui entra o código do Leo"),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context),
-                                                      child:
-                                                          const Text("Fechar"),
-                                                    ),
-                                                  ],
-                                                ),
+                                              List<String> parts = previewPath.split('/');
+                                              final filename = parts.first;
+                                              
+                                              Navigator.pushNamed(
+                                                context, 
+                                                '/image-viewer',
+                                                arguments: {
+                                                  'imageFilename': filename
+                                                }
                                               );
                                             },
                                             child: Container(

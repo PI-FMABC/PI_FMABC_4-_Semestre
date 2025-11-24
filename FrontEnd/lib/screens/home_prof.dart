@@ -42,22 +42,6 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
     }
   }
 
-  void _showFolderPreview(BuildContext context, String title) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: const Text("Preview de diretório clicado."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Fechar"),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -282,8 +266,18 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
                                         padding:
                                             const EdgeInsets.only(right: 8),
                                         child: GestureDetector(
-                                          onTap: () => _showFolderPreview(
-                                              context, titulo),
+                                          onTap: () {
+                                            List<String> parts = previewPath.split('/');
+                                            final filename = parts.first;
+                                            
+                                            Navigator.pushNamed(
+                                              context, 
+                                              '/image-viewer-prof',
+                                              arguments: {
+                                                'imageFilename': filename
+                                              }
+                                            );
+                                          },
                                           child: Container(
                                             width: Responsive.isMobile(context)
                                                 ? 70

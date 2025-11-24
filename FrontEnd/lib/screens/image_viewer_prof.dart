@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'visualizacao_imagens.dart';
 
 class ImageViewerProfScreen extends StatelessWidget {
   const ImageViewerProfScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final imageFilename = args?['imageFilename'] ?? '';
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -127,9 +131,9 @@ class ImageViewerProfScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  "Título da Imagem",
-                                  style: TextStyle(
+                                Text(
+                                  "$imageFilename",
+                                  style: const TextStyle(
                                       color: Color(0xFF003b64),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
@@ -163,40 +167,32 @@ class ImageViewerProfScreen extends StatelessWidget {
                             child: Center(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'assets/folder_image.png',
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.image_outlined,
-                                    size: 140,
-                                    color: Color(0xFF003b64),
-                                  ),
-                                ),
+                                child: ImageCanvas(imageFileName: imageFilename)
                               ),
                             ),
                           ),
 
                           // barra inferior com zoom (visual apenas)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Icon(Icons.location_on_outlined,
-                                    color: Color(0xFF003b64)),
-                                Row(
-                                  children: [
-                                    Text("100%"),
-                                    SizedBox(width: 8),
-                                    Icon(Icons.remove, color: Color(0xFF003b64)),
-                                    SizedBox(width: 4),
-                                    Icon(Icons.add, color: Color(0xFF003b64)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                          // const Padding(
+                          //   padding: EdgeInsets.symmetric(
+                          //       horizontal: 12, vertical: 10),
+                          //   child: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //     children: [
+                          //       Icon(Icons.location_on_outlined,
+                          //           color: Color(0xFF003b64)),
+                          //       Row(
+                          //         children: [
+                          //           Text("100%"),
+                          //           SizedBox(width: 8),
+                          //           Icon(Icons.remove, color: Color(0xFF003b64)),
+                          //           SizedBox(width: 4),
+                          //           Icon(Icons.add, color: Color(0xFF003b64)),
+                          //         ],
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

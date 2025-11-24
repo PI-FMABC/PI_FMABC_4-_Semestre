@@ -34,8 +34,8 @@ bool is_tile_empty(const std::vector<uint32_t> &buffer, double limit = .8, int w
 int main() {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    std::string file = "002.mrxs";
-    const char* filename = "C:/Users/leona/Pictures/002.mrxs";
+    std::string file = "001.mrxs";
+    const char* filename = "C:/Users/leona/Pictures/001.mrxs";
     
     openslide_t* slide = openslide_open(filename);
     if (slide == nullptr) {

@@ -409,19 +409,15 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                            content: const Text(
-                                                "aqui entra o código do Leo"),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: const Text("Fechar"),
-                                              ),
-                                            ],
-                                          ),
+                                        List<String> parts = previewPath.split('/');
+                                        final filename = parts.first;
+                                        
+                                        Navigator.pushNamed(
+                                          context, 
+                                          '/image-viewer',
+                                          arguments: {
+                                            'imageFilename': filename
+                                          }
                                         );
                                       },
                                       child: previewPath.isNotEmpty

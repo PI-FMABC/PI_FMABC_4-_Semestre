@@ -459,24 +459,15 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                                                     right: 8),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (_) =>
-                                                          AlertDialog(
-                                                        title: const Text(
-                                                            "Preview clicado"),
-                                                        content: const Text(
-                                                            "aqui entra o código do Leo"),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () =>
-                                                                Navigator.pop(
-                                                                    context),
-                                                            child: const Text(
-                                                                "Fechar"),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                    List<String> parts = previewPath.split('/');
+                                                    final filename = parts.first;
+                                                    
+                                                    Navigator.pushNamed(
+                                                      context, 
+                                                      '/image-viewer',
+                                                      arguments: {
+                                                        'imageFilename': filename
+                                                      }
                                                     );
                                                   },
                                                   child: Container(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'responsive.dart';
+import 'visualizacao_imagens.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   const ImageViewerScreen({super.key});
@@ -12,6 +13,9 @@ class ImageViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final imageFilename = args?['imageFilename'] ?? '';
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -134,8 +138,8 @@ class ImageViewerScreen extends StatelessWidget {
 
               /// ===== ÁREA DE CONTEÚDO =====
               Responsive.isMobile(context)
-                  ? _buildMobileLayout(context)
-                  : _buildDesktopLayout(context),
+                  ? _buildMobileLayout(context, imageFilename)
+                  : _buildDesktopLayout(context, imageFilename),
 
               const SizedBox(height: 36),
 
@@ -157,7 +161,7 @@ class ImageViewerScreen extends StatelessWidget {
   }
 
   /// ===== LAYOUT PARA MOBILE =====
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(BuildContext context, String imageFilename) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -184,17 +188,7 @@ class ImageViewerScreen extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              'assets/folder_image.png',
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Icon(
-                  Icons.image_outlined,
-                  size: 60,
-                  color: Color(0xFF003b64),
-                ),
-              ),
-            ),
+            child: ImageCanvas(imageFileName: imageFilename)
           ),
         ),
 
@@ -288,7 +282,7 @@ class ImageViewerScreen extends StatelessWidget {
   }
 
   /// ===== LAYOUT PARA DESKTOP/TABLET =====
-  Widget _buildDesktopLayout(BuildContext context) {
+  Widget _buildDesktopLayout(BuildContext context, String imageFilename) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -318,17 +312,7 @@ class ImageViewerScreen extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    'assets/folder_image.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 100,
-                        color: Color(0xFF003b64),
-                      ),
-                    ),
-                  ),
+                  child: ImageCanvas(imageFileName: imageFilename)
                 ),
               ),
             ],

@@ -127,7 +127,7 @@ Gerenciamento de tiles
 /// Ela possui todos os atributos e métodos básicos necessários para se criar a manipulação de tiles da forma que for mais adequada do sistema de tiling para o programa.
 class TileManager {
   String dirPath;
-  String imageFileName = '001.mrxs'; // ESTE VALOR NECESSITA SER ALTERADO PARA RECEBER O VALOR DINÂMICO DO BANCO DE DADOS
+  String? imageFileName;
   int currentLevel = 0;
   int maxLevel = 0;
   int tileSize;
@@ -158,7 +158,7 @@ class TileManager {
   /// Atualmente, os valores estão definidos estáticamente no código, no entanto para o seu funcionamento correto, deve-se de alguma forma trazer esse valores do código render_tiles.cpp.
   /// Para assim, podemos desenvolver uma função que define as dimensões para cada nível possível de maneira verdadeiramente dinâmica.
   Future<void> setActualLevelDimensions() async {
-    // Actual canvas dimensions from OpenSlide for each pyramid level
+    // Dimensões da imagem vindo do OpenSlide
     levelDimensions[0] = {'width': 94600, 'height': 220936};
     levelDimensions[1] = {'width': 47300, 'height': 110468};
     levelDimensions[2] = {'width': 23650, 'height': 55234};
@@ -174,7 +174,7 @@ class TileManager {
   /// A função tem com intuito, a partir de um valor de coordenada, recuperar o arquivo de imagem correto para as coordenadas de tile apresentadas pelo objeto.
   /// Caso não exista valor e arquivo válido para aquele valor de coordenada, retorna um valor nulo.
   Future<TileData?> getTile(TileCoordinate coord) async {
-    final tilePath = '$dirPath\\level${coord.level}\\${coord.column}_${coord.row}_HQ.png';
+    final tilePath = '$dirPath\\level${coord.level}\\${coord.column}_${coord.row}_HQ.jpg';
     final tileFile = File(tilePath);
     if (!await tileFile.exists()) {
       return null;
@@ -280,16 +280,9 @@ class TilePainter extends CustomPainter {
   }
 }
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) => const MaterialApp(home: ImageCanvas());
-}
-
 class ImageCanvas extends StatefulWidget {
-  const ImageCanvas({super.key});
+  final String imageFileName;
+  const ImageCanvas({super.key, required this.imageFileName});
   @override
   State<ImageCanvas> createState() => _ImageCanvasState();
 }
@@ -307,6 +300,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
   @override
   void initState() {
     super.initState();
+    tileManager.imageFileName = widget.imageFileName;
     transformationController = TransformationController();
   }
 
@@ -612,15 +606,15 @@ class _ImageCanvasState extends State<ImageCanvas> {
             child: Row(
               children: [
                 Text('Level: ${tileManager.currentLevel}  |  '),
-                ElevatedButton(
-                  onPressed: () {
-                    Matrix4 matrix = transformationController.value;
-                    print('Matrix: $matrix');
-                    print('Viewport offset: $_viewportOffset');
-                    print('Scale: ${matrix.getMaxScaleOnAxis()}');
-                  },
-                  child: Text('Debug Info'),
-                ),
+                // ElevatedButton(
+                //   onPressed: () {
+                //     Matrix4 matrix = transformationController.value;
+                //     print('Matrix: $matrix');
+                //     print('Viewport offset: $_viewportOffset');
+                //     print('Scale: ${matrix.getMaxScaleOnAxis()}');
+                //   },
+                //   child: Text('Debug Info'),
+                // ),
                 SizedBox(width: 8),
                 ElevatedButton(onPressed: () {zoomToCenter(1);}, child: Text('Zoom +')),
                 SizedBox(width: 8),

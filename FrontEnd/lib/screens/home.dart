@@ -40,24 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (ModalRoute.of(context)?.settings.name != routeName) {
       Navigator.pushNamed(context, routeName);
     }
-  }
-
-  /// ===== ALERTA DE CÓDIGO DO LEO =====
-  void _showLeoAlert(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Preview clicado"),
-        content: const Text("Aqui você precisa adicionar o código do Leo"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Fechar"),
-          ),
-        ],
-      ),
-    );
-  }
+  }  
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +254,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         padding:
                                             const EdgeInsets.only(right: 8),
                                         child: GestureDetector(
-                                          onTap: () => _showLeoAlert(context),
+                                          onTap: () {
+                                            List<String> parts = previewPath.split('/');
+                                            final filename = parts.first;
+                                            
+                                            Navigator.pushNamed(
+                                              context, 
+                                              '/image-viewer',
+                                              arguments: {
+                                                'imageFilename': filename
+                                              }
+                                            );
+                                          },
                                           child: Container(
                                             width: Responsive.isMobile(context)
                                                 ? 70
