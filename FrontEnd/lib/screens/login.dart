@@ -14,13 +14,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Função aproveitada do código antigo + popup verde
+
   Future<void> _fazerLogin(BuildContext context) async {
     final email = _emailController.text.trim();
     final senha = _passwordController.text.trim();
     
     try {
-      // Verifica se é professor
+  
       final responseProf = await http.post(
         Uri.parse('http://localhost:3000/professores/login'),
         headers: {'Content-Type': 'application/json'},
@@ -29,9 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
           'senha': senha,
         }),
       );
-      // Login Válido 
+      
       if (responseProf.statusCode == 200) {
-        // Mostra popup verde de sucesso
+       
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.green[600],
@@ -44,14 +44,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
 
-        // Redireciona após 1 segundo
+        
         Future.delayed(const Duration(seconds: 1), () {
           Navigator.pushReplacementNamed(context, '/prof');
         });
       }
-      // Login inválido
+     
       else {
-        // Verifica se é admin
+        
         final responseAdmin = await http.post(
           Uri.parse('http://localhost:3000/admin/login'),
           headers: {'Content-Type': 'application/json'},
@@ -60,9 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
             'senha': senha,
           }),
         );
-        // Login válido
+      
         if (responseAdmin.statusCode == 200) {
-          // Mostra popup verde de sucesso para admin
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.green[600],
@@ -75,14 +75,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
 
-          // Redireciona para tela do admin após 1 segundo
+         
           Future.delayed(const Duration(seconds: 1), () {
             Navigator.pushReplacementNamed(context, '/adm');
           });
         }
-        // Login inválido
+      
         else {
-          // Não é nem professor, nem admin
+     
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               backgroundColor: Colors.red,
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF003b64),
 
-      /// ===== APPBAR COM SETA DE VOLTAR =====
+     
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         centerTitle: false,
       ),
 
-      /// ===== CORPO PRINCIPAL =====
+ 
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                /// Campo de Email
+                
                 const Text("Email:"),
                 const SizedBox(height: 5),
                 TextField(
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                /// Campo de Senha
+             
                 const Text("Senha:"),
                 const SizedBox(height: 5),
                 TextField(
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                /// Botão Fazer Login
+           
                 ElevatedButton(
                   onPressed: () => _fazerLogin(context),
                   style: ElevatedButton.styleFrom(

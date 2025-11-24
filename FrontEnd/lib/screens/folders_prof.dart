@@ -149,7 +149,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  /// TÍTULO
+                
                   _buildStyledField(
                     controller: _tituloController,
                     label: "Título",
@@ -157,7 +157,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// DESCRIÇÃO
+          
                   _buildStyledField(
                     controller: _descricaoController,
                     label: "Descrição",
@@ -166,7 +166,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// DROPDOWN PARA SELECIONAR IMAGENS
+                
                   _buildStyledDropdown(
                     label: "Selecionar imagens",
                     value: null,
@@ -185,7 +185,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
 
                   const SizedBox(height: 10),
 
-                  /// CHIPS DAS IMAGENS SELECIONADAS
+               
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
@@ -275,7 +275,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     );
   }
 
-  /// Campo de texto estilizado
+
   Widget _buildStyledField({
     required TextEditingController controller,
     required String label,
@@ -301,7 +301,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     );
   }
 
-  /// Dropdown estilizado
+
   Widget _buildStyledDropdown({
     required String label,
     required String? value,
@@ -347,9 +347,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR - RESPONSIVA
-      /// ===========================
+   
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -362,7 +360,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                     left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
+                 
                     if (Responsive.isMobile(context) ||
                         Responsive.isTablet(context))
                       Builder(
@@ -398,7 +396,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
                 ),
               ),
 
-              // BOTÃO SAIR APENAS NO DESKTOP (MOBILE FICA NO DRAWER)
+             
               if (Responsive.isDesktop(context))
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
@@ -433,9 +431,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+ 
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
@@ -444,7 +440,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
           children: [
-            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+         
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -734,7 +730,7 @@ class _FoldersProfScreenState extends State<FoldersProfScreen> {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
+ 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(

@@ -5,20 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
-/*
-O código abaixo foi para criar os algoritmos que permitem a visualização das imagens do projeto do atlas de imagens de microscópio eletrônico da FMABC.
-As imagens são divididas em pedaços menores para garantir que elas possam ser renderizadas com velocidade, precisão e com garantia que não seja necessário capacidades muito
-exigentes de memória e processamento. Para visualizar essas "pedaços" de imagem organizados nas posições corretas, foi utilizado um sistema de visualização baseado em tiles, baseado
-em coordenadas de linhas (eixo Y) e colunas (eixo X). Cada tile ocupa, na escala orginal das imagens, 512 pixels, ou seja, a cada tile, são ocupados 512 pixels em cada eixo.
-*/
 
-/*
-=======================
-Estruturação de tiles
-=======================
-*/
-/// TileCoordinate é uma classe que serve para a estruturação dos tiles, a classe é formada por apenas os atributos de posição que cada tile deve receber para ser posicionado:
-/// level, row e column.
 class TileCoordinate {
   final int level;
   final int row;
@@ -26,8 +13,7 @@ class TileCoordinate {
 
   TileCoordinate(this.level, this.row, this.column);
 
-  // Ambos os overrides abaixo têm como intuito podemos fazer comparações diretas entre instâncias desta classe. Por exemplo, comparar se o conteúdo de um TileCoordinate é igual a
-  // outro
+ 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -39,41 +25,34 @@ class TileCoordinate {
   int get hashCode => Object.hash(level, row, column);
 }
 
-/// TileData é uma classe que serve para a estruturação dos tiles, a classe é formada por apenas um atributo de tipo arquivo, o qual é o arquivo da imagem recebida e que será
-/// posicionada na tela do usuário.
+
 class TileData {
   final File file;
 
   TileData(this.file);
 }
 
-/*
-==============================
-Gerenciamento de zoom e níveis
-==============================
-*/
-/// ZoomLevelController é uma classe que existe com o intuito de gerenciar acompanhar as manipulações de zoom da visualização de um sistema de tiling piramidal, ela também possui
-/// funções para tratar parte da lógica de transição de níveis de zoom.
+
 class ZoomLevelController {
   int zoomLevel = 0;
   int maxZoomLevel = 0;
   double minScale = 0.5;
   double maxScale = 2.0;
   
-  /// É um atributo Map que tem como intuito armazenar os valores mínimo e máximo que cada nível de zoom deve possuir. Foi pensado para interação com o Widget InteractiveViewer.
+  
   Map<int, Map<String, double>> levelScaleRanges = {};
 
-  /// Define a partir de parâmetro o maior nível de zoom possível de ser alcançado.
+
   void setMaxZoomLevel(int highestLevel) {
     maxZoomLevel = highestLevel;
   }
   
-  /// Retorna se o nível atual de zoom é o máximo possível.
+
   bool isMaxZoom() {
     return zoomLevel == maxZoomLevel;
   }
   
-  /// Calcula intervalos apropriados para escalas de zoom. Cada nível deve possuir uma escala confortável ao redor da escala base de 1.0.
+ 
   void initializeLevelScaleRanges(Map<int, Map<String, int>> levelDimensions) {
     for (int level = 0; level <= maxZoomLevel; level++) {
       levelScaleRanges[level] = {
@@ -83,7 +62,7 @@ class ZoomLevelController {
     }
   }
   
-  /// Mapeia para cada nível o valor mínimo e máximo de seu intervalo de zoom.
+  
   void setScaleRangeForLevel(int level) {
     if (levelScaleRanges.containsKey(level)) {
       minScale = levelScaleRanges[level]!['min']!;
@@ -91,10 +70,9 @@ class ZoomLevelController {
     }
   }
 
-  /// Retorna em qual nível de zoom a visualização deve se encontrar baseado na escala atual. Move apenas um nível por vez, uma vez que resetamos a escala para 1.0 a cada transição 
+  
   int getLevelForScale(double currentScale) {
-    // Determine what level we should be at based on current scale
-    // Only move ONE level at a time since we reset to 1.0 after each transition
+ 
     if (currentScale >= maxScale - .01 && zoomLevel < maxZoomLevel) {
       return zoomLevel + 1;
     }
@@ -104,7 +82,7 @@ class ZoomLevelController {
     return zoomLevel;
   }
 
-  /// Atualiza o valor de zoom de nível interno baseado na escala atual do zoom da visualização.
+  
   void updateScaleLevel(Matrix4 matrix) {
     final currentScale = matrix.getMaxScaleOnAxis();
     if (currentScale >= maxScale - .01 && !isMaxZoom()) {
@@ -118,47 +96,36 @@ class ZoomLevelController {
   }
 }
 
-/*
-=======================
-Gerenciamento de tiles
-=======================
-*/
-/// A classe TileManager é responsável por gerenciar a construção, posicionamento e atualização de informações de cache e visualização de todos os tiles que formam a tela do usuário.
-/// Ela possui todos os atributos e métodos básicos necessários para se criar a manipulação de tiles da forma que for mais adequada do sistema de tiling para o programa.
+
 class TileManager {
   String dirPath;
-  String imageFileName = '001.mrxs'; // ESTE VALOR NECESSITA SER ALTERADO PARA RECEBER O VALOR DINÂMICO DO BANCO DE DADOS
+  String imageFileName = '001.mrxs'; 
   int currentLevel = 0;
   int maxLevel = 0;
   int tileSize;
-  /// O atributo loadedTiles é um map que tem como chave, um objeto TileCoordinate, e como valor, uma imagem. Ele serve como um cachê de imagens que foram carregadas
-  /// a visualização.
+  
   final Map<TileCoordinate, ui.Image?> loadedTiles = {};
-  /// O atributo levelDimensions é um map que tem como chave, uma string representando largura ou altura do nível de zoom da imagem, e como valor, um int representando
-  /// o tamanho em pixels de uma das unidades de chave. Ela tem como intuito representar o tamanho de Canvas para cada nível de zoom, para podemos posicionar tiles
-  /// e transicionar entre posições dentro de níveis, corretamente. 
+
   final Map<int, Map<String, int>> levelDimensions = {};
   
   TileManager({this.dirPath = '', this.tileSize = 512});
   
-  /// A função tem como intuito definir o diretório do arquivo de imagem correto de onde as imagens que formam os tiles virão.
+ 
   Future<void> setTilesDirectory() async {
     var documentsPath = (await getApplicationDocumentsDirectory()).path;
     dirPath = '$documentsPath\\tiles\\$imageFileName';
   }
 
-  /// A função tem como intuito definir o maior valor de nível possível da imagem sendo lida.
+  
   Future<void> getHighestLevel() async {
     maxLevel = Directory(dirPath).listSync().length - 1;
     currentLevel = maxLevel;
     await setActualLevelDimensions();
   }
 
-  /// A função tem como intuito definir as dimensões do Canvas de cada nível de zoom possível da imagem
-  /// Atualmente, os valores estão definidos estáticamente no código, no entanto para o seu funcionamento correto, deve-se de alguma forma trazer esse valores do código render_tiles.cpp.
-  /// Para assim, podemos desenvolver uma função que define as dimensões para cada nível possível de maneira verdadeiramente dinâmica.
+ 
   Future<void> setActualLevelDimensions() async {
-    // Actual canvas dimensions from OpenSlide for each pyramid level
+ 
     levelDimensions[0] = {'width': 94600, 'height': 220936};
     levelDimensions[1] = {'width': 47300, 'height': 110468};
     levelDimensions[2] = {'width': 23650, 'height': 55234};
@@ -171,8 +138,7 @@ class TileManager {
     levelDimensions[9] = {'width': 184, 'height': 431};
   }
 
-  /// A função tem com intuito, a partir de um valor de coordenada, recuperar o arquivo de imagem correto para as coordenadas de tile apresentadas pelo objeto.
-  /// Caso não exista valor e arquivo válido para aquele valor de coordenada, retorna um valor nulo.
+  
   Future<TileData?> getTile(TileCoordinate coord) async {
     final tilePath = '$dirPath\\level${coord.level}\\${coord.column}_${coord.row}_HQ.png';
     final tileFile = File(tilePath);
@@ -183,11 +149,11 @@ class TileManager {
     return tile;
   }
 
-  /// A partir do tamanho da visualização da janela do usuário, define quantos e quais tiles estão visíveis e retorna os seus valores de coordenada como um Set.
+ 
   Set<TileCoordinate> updateVisibleTiles(Rect viewPortRect) {
     final tiles = <TileCoordinate>{};
 
-    // Calculate which tiles we need based on viewport
+
     final startColumn = max(0, (viewPortRect.left / tileSize).floor());
     final lastColumn = max(0, (viewPortRect.right / tileSize).ceil());
     final startRow = max(0, (viewPortRect.top / tileSize).floor());
@@ -202,7 +168,7 @@ class TileManager {
     return tiles;
   }
 
-  /// A função tem como intuito receber um Set com valores de coordenada e os mapear para o valores de imagem válidos ou nulos para aquele conjunto de atributos de TileCoordinate.
+  
   Future<void> mapTiles(Set<TileCoordinate> setCoords) async {
     for (TileCoordinate coord in setCoords) {
       if (loadedTiles.containsKey(coord)) {
@@ -221,26 +187,20 @@ class TileManager {
     }
   }
 
-  /// Dispara o carregamento dos tiles que devem aparecer na visão do usuário a partir da interação entre as diferentes funções presentes em TileManager.
+  
   Future<void> loadTiles(Rect viewPortRect) async {
     Set<TileCoordinate> visibleCoords = updateVisibleTiles(viewPortRect);
     deloadTiles(visibleCoords);
     await mapTiles(visibleCoords);
   }
 
-  /// Descarrega do cachê de tiles, todos aqueles que não estão mais presentes na tela do usuário.
+ 
   void deloadTiles(Set<TileCoordinate> visibleCoords) {
     loadedTiles.removeWhere((coord, image) => !visibleCoords.contains(coord));
   }
 }
 
-/*
-====================
-Desenhando os tiles
-====================
-*/
-/// A classe TilePainter tem como intuito desenhar os tiles em suas posições corretas, baseando-se no tamanho real das dimensões dos seus respectivos níveis de zoom, ou até eles
-/// alcançarem o valor de 512x512 pixels por tile. Ele também escalona as imagens de seus tamanhos reais ao tamanho correto para preencher o espaço do tile por nível de zoom.
+
 class TilePainter extends CustomPainter {
   final Map<TileCoordinate, ui.Image?> loadedTiles;
   final int tileSize;
@@ -295,14 +255,14 @@ class ImageCanvas extends StatefulWidget {
 }
 
 class _ImageCanvasState extends State<ImageCanvas> {
-  bool _isLoading = true; // Flag que existe enquanto todos os tiles iniciais possam ser carregados para tela do usuário. 
-  bool _initialLoadComplete = false; // Flag que existe para que todos os atrivutos da instância tileManger tenham sido definidos corretamente.
-  Offset _viewportOffset = Offset.zero; // Variável privada que carrega o offset de viewport do usuário para o centro da tela, é importante para posicionar a tela do usuário no canvas.
-  bool _levelChangeInProgress = false; // Flag que existe para evitar o update do viewport do usuário enquanto ocorre a transição de níveis de zoom.
-  TileManager tileManager = TileManager(); // instância da classe TileManager
-  ZoomLevelController zoomLevelController = ZoomLevelController(); // instância da classe ZoomLevelController
-  late TransformationController transformationController; // Variável que carregará instância da classe TransformationController, a qual usamos para a manipulação de toda a
-                                                          // movimentação da nossa interface.
+  bool _isLoading = true; 
+  bool _initialLoadComplete = false; 
+  Offset _viewportOffset = Offset.zero; 
+  bool _levelChangeInProgress = false; 
+  TileManager tileManager = TileManager(); 
+  ZoomLevelController zoomLevelController = ZoomLevelController(); 
+  late TransformationController transformationController; 
+                                                          
 
   @override
   void initState() {
@@ -322,7 +282,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
     super.dispose();
   }
 
-  /// Instancia e define todas as variáveis e atributos necessários para carregar os primeiros tiles na tela do usuário.
+
   Future<void> startTiles() async {
     final screenSize = MediaQuery.of(context).size;
     Rect initialViewport = _viewportOffset & screenSize;
@@ -342,7 +302,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
     });
   }
 
-  /// Faz update das coordenadas do viewport do usuário, baseado no canto superior esquerdo. Posiciona o viewport no mundo virtual.
+  
   void updateViewportCoords() {
     if (_levelChangeInProgress) {
       return;
@@ -362,7 +322,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
     });
   }
 
-  /// Carrega os tiles a medida que o viewport do usuário vai se movendo pelo mundo virtual.
+ 
   Future<void> reloadTilesViewport() async {
     Matrix4 matrix = transformationController.value;
     double scale = matrix.getMaxScaleOnAxis();
@@ -384,7 +344,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
     }
   }
 
-  /// Executa um zoom no centro da tela do usuário a partir do clicar de um botão.
+
   void zoomToCenter(double num) async {
     final viewportSize = MediaQuery.of(context).size;
     final viewportCenterX = viewportSize.width / 2;

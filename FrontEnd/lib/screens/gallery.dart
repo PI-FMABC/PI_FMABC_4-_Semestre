@@ -46,7 +46,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// NAVBAR SUPERIOR
+
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -114,17 +114,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
       ),
 
-      /// DRAWER MOBILE/TABLET
+   
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
 
-      /// CONTEÚDO PRINCIPAL
       body: Padding(
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16 : 20),
         child: Column(
           children: [
-            /// MENU SUPERIOR DESKTOP
+          
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -149,7 +148,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
             if (Responsive.isDesktop(context)) const SizedBox(height: 24),
 
-            /// GRID DE IMAGENS
+          
             Expanded(
               child: imagens.isEmpty
                   ? const Center(
@@ -277,7 +276,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  /// DRAWER MOBILE/TABLET
+
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -355,7 +354,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  /// BOTÃO DE MENU DESKTOP
+
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(

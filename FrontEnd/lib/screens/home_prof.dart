@@ -63,9 +63,7 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR
-      /// ===========================
+     
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -146,22 +144,18 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER
-      /// ===========================
+     
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
 
-      /// ===========================
-      /// CONTEÚDO PRINCIPAL
-      /// ===========================
+     
       body: SingleChildScrollView(
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16 : 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ===== MENU SUPERIOR DESKTOP =====
+           
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -187,7 +181,7 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
               ),
             if (Responsive.isDesktop(context)) const SizedBox(height: 28),
 
-            /// ===== SEÇÃO INTRO =====
+           
             Text(
               "Bem-vindo ao painel do professor",
               style: TextStyle(
@@ -203,7 +197,7 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
             ),
             const SizedBox(height: 20),
 
-            /// ===== GRID DE DIRETÓRIOS MAIS USADOS =====
+           
             const Text(
               "Diretórios Mais Usados",
               style: TextStyle(
@@ -353,9 +347,7 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
         ),
       ),
 
-      /// ===========================
-      /// BOTÃO FLUTUANTE ADICIONAR
-      /// ===========================
+     
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add_gallery');
@@ -366,7 +358,7 @@ class _HomeProfScreenState extends State<HomeProfScreen> {
     );
   }
 
-  /// ===== DRAWER =====
+
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'responsive.dart'; // ajuste o caminho conforme sua estrutura de pastas
+import 'responsive.dart';
 
 class AddGalleryScreen extends StatefulWidget {
   const AddGalleryScreen({super.key});
@@ -13,7 +13,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  // mock diretórios - troque por dados reais quando tiver
+  
   final List<String> _directories = ['Diretório 1', 'Diretório 2', 'Diretório 3'];
 
   @override
@@ -38,7 +38,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   }
 
   void _saveImage() {
-    // ação mock de salvar
+   
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.green[600],
@@ -49,7 +49,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   }
 
   void _importImage() {
-    // abrir picker real no futuro
+  
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Abrir seletor de imagem'),
@@ -59,7 +59,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   }
 
   void _openDescriptionEditor() {
-    // alternativa: abrir um dialog para descrição grande
+   
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -161,7 +161,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
 }
 
   Widget _buildDrawer() {
-    // Drawer que aparece em mobile/tablet (contendo as mesmas rotas e logout)
+    
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -195,11 +195,10 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
 
   @override
   Widget build(BuildContext context) {
-    // largura disponível para ajustar proporções
+  
     final width = MediaQuery.of(context).size.width;
 
-    // para desktop: layout horizontal com card esquerdo e painel direito
-    // para mobile: empilhar verticalmente
+   
     final isMobile = Responsive.isMobile(context);
 
     return Scaffold(
@@ -211,23 +210,23 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Espaço superior (se precisar de um subtítulo)
+           
             const SizedBox(height: 8),
 
-            // Conteúdo principal
+        
             Expanded(
               child: isMobile
                   ? SingleChildScrollView(
                       child: Column(
                         children: [
-                          // card de import + descrição
+                         
                           Card(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 children: [
-                                  // Importar imagem (botão grande)
+                                 
                                   SizedBox(
                                     width: double.infinity,
                                     height: 120,
@@ -251,7 +250,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
                                   ),
                                   const SizedBox(height: 12),
 
-                                  // Inserir descrição (grande botão/área)
+                                
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
@@ -274,7 +273,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
 
                           const SizedBox(height: 16),
 
-                          // painel direito transformado em seção abaixo (título + dropdown + salvar)
+                          
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
@@ -327,7 +326,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
                   : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Card esquerdo: importar + descrição
+                       
                         Expanded(
                           flex: 2,
                           child: Card(
@@ -336,7 +335,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
                               padding: const EdgeInsets.all(20.0),
                               child: Column(
                                 children: [
-                                  // Importar imagem
+                                  
                                   SizedBox(
                                     width: double.infinity,
                                     height: 120,
@@ -385,7 +384,7 @@ PreferredSizeWidget _buildNavBar(BuildContext context) {
 
                         const SizedBox(width: 24),
 
-                        // Painel direito: título + diretório + salvar
+                     
                         Expanded(
                           flex: 1,
                           child: Column(

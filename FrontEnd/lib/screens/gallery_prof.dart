@@ -152,7 +152,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  /// LINHA: Nome da pasta + Adicionar pasta
+                
                   Row(
                     children: [
                       Expanded(
@@ -206,7 +206,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// LISTA DE PASTAS SELECIONADAS
+                
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
@@ -351,9 +351,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      /// ===========================
-      /// NAVBAR SUPERIOR - RESPONSIVA
-      /// ===========================
+   
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(Responsive.isMobile(context) ? 70 : 80),
         child: Container(
@@ -366,7 +364,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                     left: Responsive.isMobile(context) ? 12 : 20),
                 child: Row(
                   children: [
-                    // BOTÃO MENU HAMBURGUER PARA MOBILE/TABLET
+                  
                     if (Responsive.isMobile(context) ||
                         Responsive.isTablet(context))
                       Builder(
@@ -402,7 +400,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
                 ),
               ),
 
-              // BOTÃO SAIR APENAS NO DESKTOP (MOBILE FICA NO DRAWER)
+             
               if (Responsive.isDesktop(context))
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
@@ -437,9 +435,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
         ),
       ),
 
-      /// ===========================
-      /// DRAWER PARA MOBILE/TABLET
-      /// ===========================
+      
       drawer: (Responsive.isMobile(context) || Responsive.isTablet(context))
           ? _buildDrawer(context)
           : null,
@@ -448,7 +444,7 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
         padding: EdgeInsets.all(Responsive.isMobile(context) ? 16.0 : 20.0),
         child: Column(
           children: [
-            /// ===== MENU SUPERIOR APENAS NO DESKTOP =====
+          
             if (Responsive.isDesktop(context))
               Center(
                 child: Container(
@@ -682,7 +678,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     );
   }
 
-  /// ===== DRAWER PARA MOBILE/TABLET =====
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -762,7 +757,6 @@ class _GalleryProfScreenState extends State<GalleryProfScreen> {
     );
   }
 
-  /// ===== BOTÃO DE MENU =====
   Widget _buildMenuButton(BuildContext context, String label,
       {bool isActive = false, VoidCallback? onTap}) {
     return Padding(
